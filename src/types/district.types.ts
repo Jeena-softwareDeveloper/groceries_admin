@@ -12,3 +12,4 @@ export interface CreateDistrictDto {
   isActive: boolean;
 }
 
+

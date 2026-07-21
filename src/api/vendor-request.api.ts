@@ -71,3 +71,4 @@ export const vendorRequestApi = {
     api.post<ApiResponse<VendorRequest>>(ENDPOINTS.ADMIN.VENDOR_REQUESTS.REQUEST_INFO(id), { remarks }).then((r) => r.data),
 };
 
+

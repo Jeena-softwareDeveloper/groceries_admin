@@ -4,4 +4,5 @@ export * from './district.types';
 export * from './area.types';
 export * from './category.types';
 export * from './vendor.types';
+export * from './shared.types';
 

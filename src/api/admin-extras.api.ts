@@ -12,6 +12,8 @@ export const adminExtrasApi = {
   microBanners: {
     getAll: () => api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.MICRO_BANNERS).then(res => res.data),
     create: (data: any) => api.post<ApiResponse<any>>(ENDPOINTS.ADMIN.MICRO_BANNERS, data).then(res => res.data),
+    update: (id: string, data: any) => api.put<ApiResponse<any>>(`${ENDPOINTS.ADMIN.MICRO_BANNERS}/${id}`, data).then(res => res.data),
+    delete: (id: string) => api.delete<ApiResponse<any>>(`${ENDPOINTS.ADMIN.MICRO_BANNERS}/${id}`).then(res => res.data),
   },
   deliveryCharges: {
     getAll: () => api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.DELIVERY_CHARGES).then(res => res.data),
@@ -22,10 +24,14 @@ export const adminExtrasApi = {
   offers: {
     getAll: () => api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.OFFERS).then(res => res.data),
     create: (data: any) => api.post<ApiResponse<any>>(ENDPOINTS.ADMIN.OFFERS, data).then(res => res.data),
+    update: (id: string, data: any) => api.put<ApiResponse<any>>(`${ENDPOINTS.ADMIN.OFFERS}/${id}`, data).then(res => res.data),
+    delete: (id: string) => api.delete<ApiResponse<any>>(`${ENDPOINTS.ADMIN.OFFERS}/${id}`).then(res => res.data),
   },
   coupons: {
     getAll: () => api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.COUPONS).then(res => res.data),
     create: (data: any) => api.post<ApiResponse<any>>(ENDPOINTS.ADMIN.COUPONS, data).then(res => res.data),
+    update: (id: string, data: any) => api.put<ApiResponse<any>>(`${ENDPOINTS.ADMIN.COUPONS}/${id}`, data).then(res => res.data),
+    delete: (id: string) => api.delete<ApiResponse<any>>(`${ENDPOINTS.ADMIN.COUPONS}/${id}`).then(res => res.data),
   },
   customers: {
     getAll: () => api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.CUSTOMERS.BASE).then(res => res.data),
@@ -35,4 +41,5 @@ export const adminExtrasApi = {
     broadcast: (data: any) => api.post<ApiResponse<{ sent: number }>>(ENDPOINTS.ADMIN.NOTIFICATIONS.BROADCAST, data).then(res => res.data),
   }
 };
+
 

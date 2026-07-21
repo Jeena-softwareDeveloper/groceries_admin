@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { healthApi, dashboardApi } from '../api';
-import type { HealthStatus, AdminDashboardData } from '@shared/types';
+import type { HealthStatus, AdminDashboardData } from '../types';
 import {
   Calendar, Store, Users, ShoppingBag, IndianRupee, CheckCircle2, AlertCircle, Star, Apple, Milk, PackageSearch, CupSoda, Cookie, TrendingUp, ArrowRight, Loader2
 } from 'lucide-react';
@@ -264,4 +264,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 

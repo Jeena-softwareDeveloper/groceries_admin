@@ -7,3 +7,4 @@ export const districtApi = {
   create: (data: CreateDistrictDto) => api.post<ApiResponse<District>>(ENDPOINTS.ADMIN.DISTRICTS, data).then(res => res.data),
 };
 
+

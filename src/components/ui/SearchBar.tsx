@@ -30,3 +30,4 @@ export function SearchBar({ value, onChange, placeholder = 'Search...', totalCou
   );
 }
 
+

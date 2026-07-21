@@ -1,6 +1,6 @@
 import { ENDPOINTS } from './endpoints';
 import type { ApiResponse } from '../types';
-import type { HealthStatus } from '@shared/types'; // Assuming this exists
+import type { HealthStatus } from '../types'; // Assuming this exists
 
 export const healthApi = {
   // We use fetch here specifically for health check to bypass axios interceptors if needed,
@@ -12,4 +12,5 @@ export const healthApi = {
     return res.json();
   }
 };
+
 

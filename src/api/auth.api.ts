@@ -9,3 +9,4 @@ export const authApi = {
   logout: (refreshToken: string) => api.post(ENDPOINTS.AUTH.LOGOUT, { refreshToken }),
 };
 
+

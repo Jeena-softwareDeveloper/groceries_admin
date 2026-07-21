@@ -3,6 +3,7 @@ export interface Category {
   name: string;
   slug: string;
   isActive: boolean;
+  parentId?: string | null;
   children?: Category[];
 }
 
@@ -12,4 +13,5 @@ export interface CreateCategoryDto {
   isActive: boolean;
   parentId?: string;
 }
+
 

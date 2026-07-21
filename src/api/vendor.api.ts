@@ -11,3 +11,4 @@ export const vendorApi = {
   reject: (id: string, data: RejectVendorDto) => api.post<ApiResponse<Vendor>>(ENDPOINTS.ADMIN.VENDORS.REJECT(id), data).then(res => res.data),
 };
 
+

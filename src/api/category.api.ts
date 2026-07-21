@@ -10,3 +10,4 @@ export const categoryApi = {
   getVendorCategories: () => api.get<ApiResponse<any>>(ENDPOINTS.VENDOR.CATEGORIES).then(res => res.data),
 };
 
+

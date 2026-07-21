@@ -7,3 +7,4 @@ export const settingsApi = {
   update: (data: Record<string, unknown>) => api.put<ApiResponse<Record<string, unknown>>>(ENDPOINTS.ADMIN.SETTINGS, data).then(res => res.data),
 };
 
+

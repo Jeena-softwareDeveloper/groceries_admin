@@ -7,3 +7,4 @@ export const areaApi = {
   create: (data: CreateAreaDto) => api.post<ApiResponse<Area>>(ENDPOINTS.ADMIN.AREAS, data).then(res => res.data),
 };
 
+

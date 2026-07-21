@@ -1,6 +1,6 @@
 import { api } from './index';
-import type { AdminDashboardData } from '@shared/types';
-import type { ApiResponse } from '@shared/types';
+import type { AdminDashboardData } from '../types';
+import type { ApiResponse } from '../types';
 
 export const dashboardApi = {
   fetchDashboardData: async (): Promise<AdminDashboardData> => {
@@ -11,4 +11,5 @@ export const dashboardApi = {
     return res.data.data;
   }
 };
+
 

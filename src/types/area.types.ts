@@ -15,3 +15,4 @@ export interface CreateAreaDto {
   isActive: boolean;
 }
 
+
