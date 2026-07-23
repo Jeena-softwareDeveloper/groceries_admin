@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Eye, Edit, Trash2, Tag, Plus, X, Power, PowerOff } from 'lucide-react';
 import { categoryApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal, ImageUpload } from '../components/ui';
 import type { Category } from '../types';
 
 export default function CategoriesPage() {
@@ -15,6 +15,7 @@ export default function CategoriesPage() {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [parentId, setParentId] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
   
   const [search, setSearch] = useState('');
@@ -23,6 +24,7 @@ export default function CategoriesPage() {
     setName('');
     setSlug('');
     setParentId('');
+    setImageUrl('');
     setIsActive(true);
     setEditCategory(null);
     setShowForm(false);
@@ -32,6 +34,7 @@ export default function CategoriesPage() {
     setName(c.name);
     setSlug(c.slug);
     setParentId(parent || c.parentId || '');
+    setImageUrl(c.imageUrl || '');
     setIsActive(c.isActive);
     setEditCategory(c);
   };
@@ -39,9 +42,9 @@ export default function CategoriesPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editCategory) {
-      await categoryApi.update(editCategory.id, { name, slug, parentId: parentId || undefined, isActive });
+      await categoryApi.update(editCategory.id, { name, slug, imageUrl: imageUrl || undefined, parentId: parentId || undefined, isActive });
     } else {
-      await categoryApi.create({ name, slug, parentId: parentId || undefined, isActive });
+      await categoryApi.create({ name, slug, imageUrl: imageUrl || undefined, parentId: parentId || undefined, isActive });
     }
     resetForm();
     refetch();
@@ -99,8 +102,12 @@ export default function CategoriesPage() {
       header: 'Name',
       cell: (c) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
-            <Tag size={14} className="text-slate-400" strokeWidth={2.5} />
+          <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0 overflow-hidden border border-slate-200">
+            {c.imageUrl ? (
+              <img src={c.imageUrl} alt={c.name} className="w-full h-full object-cover" />
+            ) : (
+              <Tag size={16} className="text-slate-400" strokeWidth={2.5} />
+            )}
           </div>
           <span className="font-bold text-slate-900">{c.name}</span>
         </div>
@@ -168,6 +175,10 @@ export default function CategoriesPage() {
         title={editCategory ? 'Edit Category' : 'Add New Category'}
       >
         <form onSubmit={handleSave} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Category Image</label>
+            <ImageUpload value={imageUrl} onChange={setImageUrl} folder="districtmart-categories" />
+          </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Category Name</label>
             <input
