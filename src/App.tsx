@@ -12,7 +12,8 @@ import AnalyticsPage from './pages/AnalyticsPage';
 import { BannersPage, CustomersPage, NotificationsPage, OffersPage, CouponsPage, MicroBannersPage, DeliveryChargesPage } from './pages/AdminExtras';
 import VendorRequestsPage from './pages/VendorRequestsPage';
 import ProductApprovalsPage from './pages/ProductApprovalsPage';
-
+import SettlementsPage from './pages/SettlementsPage';
+import AuditLogsPage from './pages/AuditLogsPage';
 
 import { AdminRoute, GuestRoute } from './guards';
 
@@ -37,6 +38,8 @@ export default function App() {
             <Route path="vendors" element={<VendorsPage />} />
             <Route path="vendor-requests" element={<VendorRequestsPage />} />
             <Route path="product-approvals" element={<ProductApprovalsPage />} />
+            <Route path="settlements" element={<SettlementsPage />} />
+            <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="banners" element={<BannersPage />} />
 
             <Route path="micro-banners" element={<MicroBannersPage />} />

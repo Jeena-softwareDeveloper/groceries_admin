@@ -16,6 +16,7 @@ const navItems = [
   { path: '/vendors', label: 'Vendors', icon: Store },
   { path: '/vendor-requests', label: 'Vendor Requests', icon: ClipboardList, badge: true },
   { path: '/product-approvals', label: 'Product Approvals', icon: ClipboardList },
+  { path: '/settlements', label: 'Settlements', icon: Tag },
   { path: '/banners', label: 'Banners', icon: Image },
   { path: '/micro-banners', label: 'Micro Banners', icon: Layers },
   { path: '/delivery-charges', label: 'Delivery', icon: Truck },
