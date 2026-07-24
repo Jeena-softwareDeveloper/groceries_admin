@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { adminClient } from '../api/client';
-import DataTable from '../components/ui/DataTable';
-import Modal from '../components/ui/Modal';
-import { DollarSign, CheckCircle, XCircle, Clock, RefreshCw, Building } from 'lucide-react';
+import { api } from '../api/client';
+import { DataTable, Modal, ColumnDef } from '../components/ui';
+import { DollarSign, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 interface Settlement {
   id: string;
@@ -31,7 +30,7 @@ export default function SettlementsPage() {
   const fetchSettlements = async () => {
     setLoading(true);
     try {
-      const res = await adminClient.get<{ data: Settlement[] }>('/settlements', {
+      const res = await api.get<{ data: Settlement[] }>('/admin/settlements', {
         params: { status: activeTab === 'ALL' ? undefined : activeTab },
       });
       setSettlements(res.data?.data || []);
@@ -50,7 +49,7 @@ export default function SettlementsPage() {
     if (!selectedSettlement) return;
     setActionLoading(true);
     try {
-      await adminClient.post(`/settlements/${selectedSettlement.id}/approve`, {
+      await api.post(`/admin/settlements/${selectedSettlement.id}/approve`, {
         bankReference: bankRef,
       });
       setSelectedSettlement(null);
@@ -67,18 +66,18 @@ export default function SettlementsPage() {
     const reason = prompt('Enter rejection reason:');
     if (!reason) return;
     try {
-      await adminClient.post(`/settlements/${id}/reject`, { reason });
+      await api.post(`/admin/settlements/${id}/reject`, { reason });
       fetchSettlements();
     } catch (e) {
       alert('Rejection failed');
     }
   };
 
-  const columns = [
+  const columns: ColumnDef<Settlement>[] = [
     {
       key: 'settlementNo',
       header: 'Settlement #',
-      render: (row: Settlement) => (
+      cell: (row: Settlement) => (
         <div>
           <div className="font-bold text-slate-900">{row.settlementNo}</div>
           <div className="text-xs text-slate-500">
@@ -90,31 +89,31 @@ export default function SettlementsPage() {
     {
       key: 'totalOrders',
       header: 'Orders',
-      render: (row: Settlement) => <span className="font-semibold text-slate-700">{row.totalOrders}</span>,
+      cell: (row: Settlement) => <span className="font-semibold text-slate-700">{row.totalOrders}</span>,
     },
     {
       key: 'grossAmount',
       header: 'Gross Total',
-      render: (row: Settlement) => <span className="font-medium text-slate-600">₹{Number(row.grossAmount).toFixed(2)}</span>,
+      cell: (row: Settlement) => <span className="font-medium text-slate-600">₹{Number(row.grossAmount).toFixed(2)}</span>,
     },
     {
       key: 'commissionAmount',
       header: 'Commission (5%)',
-      render: (row: Settlement) => (
+      cell: (row: Settlement) => (
         <span className="text-amber-700 font-medium">₹{Number(row.commissionAmount).toFixed(2)}</span>
       ),
     },
     {
       key: 'netAmount',
       header: 'Net Payout',
-      render: (row: Settlement) => (
+      cell: (row: Settlement) => (
         <span className="font-bold text-emerald-700 text-base">₹{Number(row.netAmount).toFixed(2)}</span>
       ),
     },
     {
       key: 'status',
       header: 'Status',
-      render: (row: Settlement) => {
+      cell: (row: Settlement) => {
         const badgeStyles = {
           PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
           APPROVED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -131,7 +130,7 @@ export default function SettlementsPage() {
     {
       key: 'actions',
       header: 'Actions',
-      render: (row: Settlement) => (
+      cell: (row: Settlement) => (
         <div className="flex items-center gap-2">
           {row.status === 'PENDING' && (
             <>

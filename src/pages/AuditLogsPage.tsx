@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { adminClient } from '../api/client';
-import DataTable from '../components/ui/DataTable';
+import { api } from '../api/client';
+import { DataTable, ColumnDef } from '../components/ui';
 import { ShieldAlert, Search, RefreshCw } from 'lucide-react';
 
 interface AuditLogItem {
@@ -24,7 +24,7 @@ export default function AuditLogsPage() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      const res = await adminClient.get<{ data: AuditLogItem[] }>('/audit-logs', {
+      const res = await api.get<{ data: AuditLogItem[] }>('/admin/audit-logs', {
         params: { search: search || undefined },
       });
       setLogs(res.data?.data || []);
@@ -39,11 +39,11 @@ export default function AuditLogsPage() {
     fetchLogs();
   }, []);
 
-  const columns = [
+  const columns: ColumnDef<AuditLogItem>[] = [
     {
       key: 'createdAt',
       header: 'Timestamp',
-      render: (row: AuditLogItem) => (
+      cell: (row: AuditLogItem) => (
         <span className="text-xs text-slate-500 font-mono">
           {new Date(row.createdAt).toLocaleString()}
         </span>
@@ -52,7 +52,7 @@ export default function AuditLogsPage() {
     {
       key: 'actorType',
       header: 'Actor',
-      render: (row: AuditLogItem) => (
+      cell: (row: AuditLogItem) => (
         <div>
           <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-slate-100 text-slate-700">
             {row.actorType}
@@ -66,14 +66,14 @@ export default function AuditLogsPage() {
     {
       key: 'action',
       header: 'Action',
-      render: (row: AuditLogItem) => (
+      cell: (row: AuditLogItem) => (
         <span className="font-bold text-slate-900 text-sm">{row.action}</span>
       ),
     },
     {
       key: 'entity',
       header: 'Target Entity',
-      render: (row: AuditLogItem) => (
+      cell: (row: AuditLogItem) => (
         <div className="text-xs">
           <span className="font-semibold text-emerald-800">{row.entityType}</span>
           <span className="text-slate-500 font-mono ml-1">#{row.entityId.substring(0, 10)}</span>
@@ -83,7 +83,7 @@ export default function AuditLogsPage() {
     {
       key: 'details',
       header: 'Details',
-      render: (row: AuditLogItem) => (
+      cell: (row: AuditLogItem) => (
         <pre className="text-[11px] font-mono text-slate-600 bg-slate-50 p-1.5 rounded border border-slate-200 max-w-xs overflow-x-auto m-0">
           {row.details ? JSON.stringify(row.details, null, 1) : '-'}
         </pre>
