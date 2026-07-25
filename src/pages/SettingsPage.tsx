@@ -5,6 +5,7 @@ import {
   UploadCloud, Lock, CheckCircle
 } from 'lucide-react';
 import { settingsApi } from '../api';
+import { PageHeader } from '../components/ui';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('General');
@@ -189,21 +190,21 @@ export default function SettingsPage() {
     <div className="text-slate-900 h-full flex flex-col">
       {/* Header & Tabs */}
       <div className="shrink-0">
-        <div className="flex justify-between items-end mb-2">
-          <div>
-            <h1 className="m-0 text-3xl text-slate-900 font-bold mb-1">App Settings</h1>
-            <p className="text-sm text-slate-500 m-0">Manage platform-wide configuration and preferences</p>
-          </div>
-          <button 
-            onClick={handleSave} 
-            className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700 shadow-sm"
-          >
-            Save Settings
-          </button>
-        </div>
+        <PageHeader
+          title="App Settings"
+          description="Manage platform-wide configuration and preferences"
+          action={
+            <button 
+              onClick={handleSave} 
+              className="flex items-center gap-2 bg-slate-900 border border-transparent text-white px-4 h-9 rounded-lg text-[13px] font-semibold cursor-pointer transition-all hover:bg-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+            >
+              Save Settings
+            </button>
+          }
+        />
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200 mt-8 overflow-x-auto no-scrollbar">
+        <div className="flex border-b border-slate-200 overflow-x-auto no-scrollbar">
           {tabs.map((tab) => (
             <button
               key={tab}

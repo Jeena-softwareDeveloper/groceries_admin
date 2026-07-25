@@ -47,8 +47,8 @@ export function DataTable<T>({ data, columns, loading, emptyState, pagination, r
 
   return (
     <div className="bg-white border border-slate-200/75 rounded-lg overflow-hidden shadow-sm flex flex-col">
-      <div className="overflow-auto w-full max-h-[calc(100vh-200px)]">
-        <table className="w-full border-collapse">
+      <div className="overflow-auto no-scrollbar w-full max-h-[calc(100vh-200px)]">
+        <table className="w-full border-collapse [&_*]:!font-normal">
           <thead className="sticky top-0 z-20">
             <tr className="bg-slate-50 shadow-sm border-b border-slate-100">
               {renderExpandedRow && (
@@ -57,7 +57,7 @@ export function DataTable<T>({ data, columns, loading, emptyState, pagination, r
               {columns.map((col, index) => (
                 <th 
                   key={col.key || index} 
-                  className={`px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wider text-slate-400 whitespace-nowrap bg-slate-50 ${col.headerClassName || ''}`}
+                  className={`px-4 py-3 text-left text-[11px] uppercase tracking-wider text-slate-600 whitespace-nowrap bg-slate-50 ${col.headerClassName || ''}`}
                 >
                   <div className="inline-flex items-center gap-1">
                     {col.header} 

@@ -123,37 +123,22 @@ export default function VendorsPage() {
         title="Vendors" 
         description="Manage and monitor all registered vendors on the platform." 
         action={
-          <button className="flex items-center gap-2 bg-slate-900 border border-transparent text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2">
-            <Plus size={16} /> Add Vendor
-          </button>
+          <div className="flex items-center gap-3">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="bg-white border border-slate-200 text-slate-700 text-[13px] font-medium py-2 px-3 rounded-lg outline-none cursor-pointer hover:border-slate-300 focus:border-slate-300 focus:ring-2 focus:ring-slate-100 min-w-[160px] h-9"
+            >
+              <option value="">All Vendors ({statusCounts.all})</option>
+              <option value="PENDING">Pending ({statusCounts.pending})</option>
+              <option value="APPROVED">Approved ({statusCounts.approved})</option>
+            </select>
+            <button className="flex items-center h-9 gap-2 bg-slate-900 border border-transparent text-white px-4 rounded-lg text-[13px] font-semibold shadow-sm hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2">
+              <Plus size={15} strokeWidth={2.5} /> Add Vendor
+            </button>
+          </div>
         }
       />
-
-      <div className="flex items-center gap-3 flex-wrap">
-        {[
-          { label: 'All Vendors', count: statusCounts.all, icon: Store, active: filter === '' },
-          { label: 'Pending Approval', count: statusCounts.pending, icon: Users, active: filter === 'PENDING' },
-          { label: 'Approved', count: statusCounts.approved, icon: Check, active: filter === 'APPROVED' },
-        ].map((chip, i) => (
-          <button
-            key={i}
-            onClick={() => setFilter(i === 0 ? '' : i === 1 ? 'PENDING' : 'APPROVED')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
-              chip.active
-                ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:text-slate-900'
-            }`}
-          >
-            <chip.icon size={14} strokeWidth={2.5} />
-            {chip.label}
-            <span className={`ml-1 text-xs font-bold px-1.5 py-0.5 rounded-md ${chip.active ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'}`}>
-              {chip.count}
-            </span>
-          </button>
-        ))}
-
-
-      </div>
 
       <DataTable 
         columns={columns}

@@ -20,28 +20,22 @@ import {
   ArrowRight
 } from 'lucide-react';
 import './AnalyticsPage.css';
+import { PageHeader } from '../components/ui';
 
 export default function AnalyticsPage() {
   return (
     <div className="flex flex-col gap-8 w-full max-w-[1600px] mx-auto pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight m-0 mb-1.5">Analytics Overview</h1>
-          <p className="text-sm font-medium text-slate-500 m-0">Track key performance metrics and insights of your marketplace.</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 border border-slate-200 bg-white rounded-lg px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200">
-            <Calendar size={16} className="text-slate-500" />
+      <PageHeader
+        title="Analytics Overview"
+        description="Track key performance metrics and insights of your marketplace."
+        action={
+          <button className="flex items-center gap-2 border border-slate-200 bg-white rounded-lg px-4 h-9 text-[13px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200">
+            <Calendar size={15} className="text-slate-500" strokeWidth={2.5} />
             12 Jul 2025 - 12 Aug 2025
             <ChevronDown size={14} className="text-slate-400 ml-1" />
           </button>
-          <button className="flex items-center gap-2 border border-transparent bg-slate-900 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2">
-            <Download size={16} />
-            Export Report
-          </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Row 1: KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">

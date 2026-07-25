@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminExtrasApi } from '../api';
 import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, ChevronLeft, ChevronRight, Ban, Send, Check } from 'lucide-react';
-import { Modal, ImageUpload } from '../components/ui';
+import { Modal, ImageUpload, PageHeader } from '../components/ui';
 
 // Generic Pagination component to avoid repetition
 const Pagination = ({ count }: { count: number }) => (
@@ -80,17 +80,18 @@ export function BannersPage() {
 
   return (
     <div className="text-slate-900">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="m-0 text-2xl text-slate-900 font-bold">Banners</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-white border border-green-600 text-green-600 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-50">
-            <Filter size={16} /> Filters
-          </button>
+            <PageHeader 
+        title="Banners"
+        description=""
+        action={
+          <div className="flex items-center gap-3">
+            
           <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
             <Plus size={16} /> Add Banner
           </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editingId ? 'Edit Banner' : 'Add Banner'}>
         <form className="flex flex-col gap-4" onSubmit={createOrUpdate}>
           <div>
@@ -199,14 +200,15 @@ export function CustomersPage() {
 
   return (
     <div className="text-slate-900">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="m-0 text-2xl text-slate-900 font-bold">Customers</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-white border border-green-600 text-green-600 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-50">
-            <Filter size={16} /> Filters
-          </button>
-        </div>
-      </div>
+            <PageHeader 
+        title="Customers"
+        description=""
+        action={
+          <div className="flex items-center gap-3">
+            
+          </div>
+        }
+      />
       <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
         <div className="overflow-x-auto w-full">
           <table className="w-full border-collapse">
@@ -296,17 +298,18 @@ export function MicroBannersPage() {
 
   return (
     <div className="text-slate-900">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="m-0 text-2xl text-slate-900 font-bold">Micro Banners</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-white border border-green-600 text-green-600 px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-50">
-            <Filter size={16} /> Filters
-          </button>
+            <PageHeader 
+        title="Micro Banners"
+        description=""
+        action={
+          <div className="flex items-center gap-3">
+            
           <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
             <Plus size={16} /> Add Micro Banner
           </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editingId ? 'Edit Micro Banner' : 'Add Micro Banner'}>
         <form className="flex flex-col gap-4" onSubmit={createOrUpdate}>
           <div>
@@ -439,14 +442,17 @@ export function DeliveryChargesPage() {
 
   return (
     <div className="text-slate-900">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="m-0 text-2xl text-slate-900 font-bold">Delivery Charges</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
+            <PageHeader 
+        title="Delivery Charges"
+        description=""
+        action={
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
             <Plus size={16} /> Add Rule
           </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editingId ? 'Edit Rule' : 'Add Rule'}>
         <form className="flex flex-col gap-5 p-2" onSubmit={createOrUpdate}>
           <div>
@@ -592,14 +598,17 @@ export function OffersPage() {
 
   return (
     <div className="text-slate-900">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="m-0 text-2xl text-slate-900 font-bold">Offers</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
+            <PageHeader 
+        title="Offers"
+        description=""
+        action={
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
             <Plus size={16} /> Add Offer
           </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editingId ? 'Edit Offer' : 'Add Offer'}>
         <form className="flex flex-col gap-4" onSubmit={createOrUpdate}>
           <div>
@@ -698,14 +707,17 @@ export function CouponsPage() {
 
   return (
     <div className="text-slate-900">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="m-0 text-2xl text-slate-900 font-bold">Coupons</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
+            <PageHeader 
+        title="Coupons"
+        description=""
+        action={
+          <div className="flex items-center gap-3">
+            <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
             <Plus size={16} /> Add Coupon
           </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editingId ? 'Edit Coupon' : 'Add Coupon'}>
         <form className="flex flex-col gap-4" onSubmit={createOrUpdate}>
           <div>

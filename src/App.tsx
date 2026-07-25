@@ -10,7 +10,6 @@ import VendorsPage from './pages/VendorsPage';
 import SettingsPage from './pages/SettingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import { BannersPage, CustomersPage, NotificationsPage, OffersPage, CouponsPage, MicroBannersPage, DeliveryChargesPage } from './pages/AdminExtras';
-import VendorRequestsPage from './pages/VendorRequestsPage';
 import ProductApprovalsPage from './pages/ProductApprovalsPage';
 import SettlementsPage from './pages/SettlementsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
@@ -36,7 +35,6 @@ export default function App() {
             <Route path="areas" element={<AreasPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="vendors" element={<VendorsPage />} />
-            <Route path="vendor-requests" element={<VendorRequestsPage />} />
             <Route path="product-approvals" element={<ProductApprovalsPage />} />
             <Route path="settlements" element={<SettlementsPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />

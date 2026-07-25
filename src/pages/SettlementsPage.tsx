@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import { DataTable, Modal, ColumnDef } from '../components/ui';
+import { DataTable, Modal, ColumnDef, PageHeader } from '../components/ui';
 import { DollarSign, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 interface Settlement {
@@ -155,43 +155,30 @@ export default function SettlementsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <DollarSign className="text-emerald-600" /> Vendor Financial Settlements
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Automated settlement generation, double-entry wallet ledger, and payout approvals.
-          </p>
-        </div>
-        <button
-          onClick={fetchSettlements}
-          className="bg-white border border-slate-200 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 cursor-pointer flex items-center gap-2 shrink-0 self-start"
-        >
-          <RefreshCw size={16} /> Refresh
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-slate-200 gap-2">
-        {(['PENDING', 'APPROVED', 'REJECTED', 'ALL'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2.5 text-sm font-semibold border-b-2 cursor-pointer transition-colors border-none bg-transparent ${
-              activeTab === tab
-                ? 'border-emerald-600 text-emerald-700 border-solid'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
-          >
-            {tab === 'PENDING' && 'Pending Approvals'}
-            {tab === 'APPROVED' && 'Approved / Paid'}
-            {tab === 'REJECTED' && 'Rejected'}
-            {tab === 'ALL' && 'All Settlements'}
-          </button>
-        ))}
-      </div>
+      <PageHeader
+        title="Vendor Financial Settlements"
+        description="Automated settlement generation, double-entry wallet ledger, and payout approvals."
+        action={
+          <div className="flex items-center gap-3">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value as any)}
+              className="bg-white border border-slate-200 text-slate-700 text-[13px] font-medium py-2 px-3 rounded-lg outline-none cursor-pointer hover:border-slate-300 focus:border-slate-300 focus:ring-2 focus:ring-slate-100 min-w-[160px] h-9"
+            >
+              <option value="PENDING">Pending Approvals</option>
+              <option value="APPROVED">Approved / Paid</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="ALL">All Settlements</option>
+            </select>
+            <button
+              onClick={fetchSettlements}
+              className="bg-slate-900 border border-transparent text-white px-4 h-9 rounded-lg text-[13px] font-semibold hover:bg-slate-800 cursor-pointer flex items-center gap-2 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+            >
+              <RefreshCw size={15} strokeWidth={2.5} /> Refresh
+            </button>
+          </div>
+        }
+      />
 
       {/* Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
