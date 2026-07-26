@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Globe, Plus, X, Eye, Edit, Trash2 } from 'lucide-react';
 import { districtApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal } from '../components/ui';
 import type { District } from '../types';
 
 export default function DistrictsPage() {
@@ -10,14 +10,12 @@ export default function DistrictsPage() {
   
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
-  const [code, setCode] = useState('');
   const [search, setSearch] = useState('');
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    await districtApi.create({ name, code, isActive: true });
+    await districtApi.create({ name, isActive: true });
     setName('');
-    setCode('');
     setShowForm(false);
     refetch();
   };
@@ -125,47 +123,43 @@ export default function DistrictsPage() {
         action={
           <button
             className="flex items-center gap-2 bg-slate-900 border border-transparent text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-slate-800 transition-all"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => setShowForm(true)}
           >
-            {showForm ? <X size={16} strokeWidth={2.5} /> : <Plus size={16} strokeWidth={2.5} />}
-            {showForm ? 'Cancel' : 'Add District'}
+            <Plus size={16} strokeWidth={2.5} />
+            Add District
           </button>
         }
       />
 
-      {showForm && (
+      <Modal
+        isOpen={showForm}
+        onClose={() => setShowForm(false)}
+        title="Add New District"
+      >
         <form
-          className="flex flex-wrap items-end gap-4 p-5 bg-white rounded-lg border border-slate-200/75 shadow-sm"
+          className="flex flex-col gap-4"
           onSubmit={handleCreate}
         >
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400">District Name</label>
             <input
-              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-56"
+              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-full"
               placeholder="e.g. Bangalore"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Code</label>
-            <input
-              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-36 uppercase"
-              placeholder="e.g. BLR"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-            />
+          <div className="flex justify-end mt-4">
+            <button
+              type="submit"
+              className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm"
+            >
+              Save District
+            </button>
           </div>
-          <button
-            type="submit"
-            className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm"
-          >
-            Save District
-          </button>
         </form>
-      )}
+      </Modal>
 
 
 

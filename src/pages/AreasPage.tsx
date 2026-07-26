@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { MapPin, Plus, X, Eye, Edit, Trash2 } from 'lucide-react';
 import { areaApi, districtApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal } from '../components/ui';
 import type { Area } from '../types';
 
 export default function AreasPage() {
@@ -121,23 +121,27 @@ export default function AreasPage() {
         action={
           <button
             className="flex items-center gap-2 bg-slate-900 border border-transparent text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm hover:bg-slate-800 transition-all"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => setShowForm(true)}
           >
-            {showForm ? <X size={16} strokeWidth={2.5} /> : <Plus size={16} strokeWidth={2.5} />}
-            {showForm ? 'Cancel' : 'Add Area'}
+            <Plus size={16} strokeWidth={2.5} />
+            Add Area
           </button>
         }
       />
 
-      {showForm && (
+      <Modal 
+        isOpen={showForm} 
+        onClose={() => setShowForm(false)}
+        title="Add New Area"
+      >
         <form
-          className="flex flex-wrap items-end gap-4 p-5 bg-white rounded-lg border border-slate-200/75 shadow-sm"
+          className="flex flex-col gap-4"
           onSubmit={handleCreate}
         >
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400">District</label>
             <select
-              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-48 appearance-none"
+              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-full appearance-none"
               value={districtId}
               onChange={(e) => setDistrictId(e.target.value)}
               required
@@ -150,7 +154,7 @@ export default function AreasPage() {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Area Name</label>
             <input
-              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-52"
+              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-full"
               placeholder="e.g. Koramangala"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -160,20 +164,22 @@ export default function AreasPage() {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Pincode <span className="text-slate-300 normal-case font-medium">(optional)</span></label>
             <input
-              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-36"
+              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-full"
               placeholder="e.g. 560034"
               value={pincode}
               onChange={(e) => setPincode(e.target.value)}
             />
           </div>
-          <button
-            type="submit"
-            className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm"
-          >
-            Save Area
-          </button>
+          <div className="flex justify-end mt-4">
+            <button
+              type="submit"
+              className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-emerald-700 transition-colors shadow-sm"
+            >
+              Save Area
+            </button>
+          </div>
         </form>
-      )}
+      </Modal>
 
 
 

@@ -6,6 +6,10 @@ export interface Vendor {
   id: string;
   shopName: string;
   email: string;
+  code?: string;
+  logoUrl?: string;
+  turnover?: number;
+  productsCount?: number;
   status: VendorStatus;
   area: Area;
 }

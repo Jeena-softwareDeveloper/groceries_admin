@@ -53,14 +53,16 @@ export default function Layout() {
     navigate('/login');
   };
 
-  const SidebarContent = ({ onLinkClick }: { onLinkClick?: () => void }) => (
+  const SidebarContent = ({ onLinkClick, forceOpen }: { onLinkClick?: () => void, forceOpen?: boolean }) => {
+    const isOpen = forceOpen || isSidebarOpen;
+    return (
     <div className="flex flex-col h-full overflow-hidden w-full">
       {/* Logo */}
-      <div className={`flex items-center shrink-0 ${isSidebarOpen ? 'p-4 gap-2' : 'py-5 px-3 justify-center'}`}>
+      <div className={`flex items-center shrink-0 ${isOpen ? 'p-4 gap-2' : 'py-5 px-3 justify-center'}`}>
         <div className="flex items-center justify-center relative w-11 h-11 shrink-0">
           <img src="/logo.png" alt="All Time Market" className="w-full h-full object-contain" />
         </div>
-        {isSidebarOpen && (
+        {isOpen && (
           <div className="flex flex-col min-w-0">
             <h2 className="m-0 text-[15px] font-bold tracking-wide whitespace-nowrap">All Time Market</h2>
             <span className="text-[9px] text-green-100 font-medium tracking-wide whitespace-nowrap">Fresh Groceries, Fast Delivery</span>
@@ -79,17 +81,17 @@ export default function Layout() {
                 key={item.path}
                 to={item.path}
                 onClick={onLinkClick}
-                className={`relative flex items-center ${isSidebarOpen ? 'gap-3 px-3' : 'justify-center px-0'} py-2.5 rounded-lg text-[13px] font-medium transition-colors no-underline ${isActive ? 'bg-green-600 text-white' : 'text-slate-200 hover:bg-white/10'}`}
-                title={!isSidebarOpen ? item.label : undefined}
+                className={`relative flex items-center ${isOpen ? 'gap-3 px-3' : 'justify-center px-0'} py-2.5 rounded-lg text-[13px] font-medium transition-colors no-underline ${isActive ? 'bg-green-600 text-white' : 'text-slate-200 hover:bg-white/10'}`}
+                title={!isOpen ? item.label : undefined}
               >
                 <Icon size={17} className="shrink-0" />
-                {isSidebarOpen && <span style={{ flex: 1 }} className="whitespace-nowrap">{item.label}</span>}
+                {isOpen && <span style={{ flex: 1 }} className="whitespace-nowrap">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {isSidebarOpen && (
+        {isOpen && (
           <div className="mx-3 mb-3 shrink-0 bg-gradient-to-b from-[#104a2d] to-[#0d3d25] border border-white/10 rounded-lg p-4 text-left relative overflow-hidden">
             <h4 className="m-0 mb-1 text-xs font-bold relative z-10 whitespace-nowrap">Grow your marketplace</h4>
             <p className="m-0 mb-3 text-[11px] text-slate-300 leading-snug relative z-10">Add more vendors and increase your reach.</p>
@@ -101,12 +103,12 @@ export default function Layout() {
       </div>
 
       {/* User */}
-      <div className={`mx-3 mb-4 pt-3 shrink-0 border-t border-white/10 flex items-center ${isSidebarOpen ? 'justify-between' : 'justify-center flex-col gap-3'}`}>
+      <div className={`mx-3 mb-4 pt-3 shrink-0 border-t border-white/10 flex items-center ${isOpen ? 'justify-between' : 'justify-center flex-col gap-3'}`}>
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-8 h-8 shrink-0 bg-green-200 text-green-800 rounded-full flex items-center justify-center font-bold text-xs">
             {user?.name ? user.name.substring(0, 2).toUpperCase() : 'SA'}
           </div>
-          {isSidebarOpen && (
+          {isOpen && (
             <div className="flex flex-col min-w-0">
               <strong className="text-[12px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[110px]">
                 {user?.name || 'Super Admin'}
@@ -123,6 +125,7 @@ export default function Layout() {
       </div>
     </div>
   );
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-900">
@@ -142,7 +145,7 @@ export default function Layout() {
         >
           <X size={18} />
         </button>
-        <SidebarContent onLinkClick={() => setIsMobileSidebarOpen(false)} />
+        <SidebarContent onLinkClick={() => setIsMobileSidebarOpen(false)} forceOpen={true} />
       </aside>
 
       {/* Desktop Sidebar */}

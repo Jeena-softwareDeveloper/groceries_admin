@@ -8,7 +8,7 @@ export interface District {
 
 export interface CreateDistrictDto {
   name: string;
-  code: string;
+  code?: string;
   isActive: boolean;
 }
 

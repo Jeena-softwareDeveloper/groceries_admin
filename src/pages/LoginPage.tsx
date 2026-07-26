@@ -27,7 +27,7 @@ export default function LoginPage() {
           ?.data?.error?.message ??
         (err as { message?: string })?.message ??
         'Invalid email or password';
-      setError(msg.includes('Network') || msg.includes('404') ? 'Cannot reach API — use http://127.0.0.1:3000' : msg);
+      setError(msg.includes('Network') || msg.includes('404') ? 'Cannot reach API — check if server is running' : msg);
     } finally {
       setLoading(false);
     }

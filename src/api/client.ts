@@ -22,8 +22,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
       localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/vendor/login')) {
-        window.location.href = window.location.pathname.startsWith('/vendor') ? '/vendor/login' : '/login';
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

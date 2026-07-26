@@ -1,33 +1,87 @@
 import { useState } from 'react';
 import { Store, Users, Check, X, Eye, Edit, Trash2, Plus } from 'lucide-react';
-import { vendorApi } from '../api';
+import { vendorApi, vendorRequestApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer } from '../components/ui';
 import type { Vendor } from '../types';
 
 export default function VendorsPage() {
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [selectedVendor, setSelectedVendor] = useState<any>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerMode, setDrawerMode] = useState<'review' | 'view' | 'edit'>('review');
   
-  const { data: allVendors = [], loading, refetch } = useApiData(() => vendorApi.getAll());
+  const { data: allVendors = [], loading: vLoading, refetch: vRefetch } = useApiData(() => vendorApi.getAll());
+  const { data: requestData, loading: rLoading, refetch: rRefetch } = useApiData(() => vendorRequestApi.getAll('PENDING', 1, 100));
 
-  const approve = async (id: string) => {
-    await vendorApi.approve(id);
-    refetch();
+  const allRequests = Array.isArray(requestData) ? requestData : [];
+  
+  const normalizedRequests = allRequests.map(r => ({
+    id: r.id,
+    shopName: r.shopName || 'Unknown Shop',
+    email: r.email || 'No Email',
+    status: r.status,
+    area: { name: r.area?.name || 'Unknown', district: { name: r.district?.name || 'Unknown' } },
+    isRequest: true
+  }));
+
+  const normalizedVendors = allVendors.map(v => ({
+    ...v,
+    isRequest: false
+  }));
+
+  const mergedList = [...normalizedVendors, ...normalizedRequests];
+
+  const approve = async (id: string, isRequest: boolean) => {
+    if (isRequest) await vendorRequestApi.approve(id);
+    else await vendorApi.approve(id);
+    vRefetch();
+    rRefetch();
   };
 
-  const reject = async (id: string) => {
-    await vendorApi.reject(id, { reason: 'Does not meet requirements' });
-    refetch();
+  const reject = async (id: string, isRequest: boolean, reason?: string) => {
+    if (isRequest) await vendorRequestApi.reject(id, reason || 'Does not meet requirements');
+    else await vendorApi.reject(id, { reason: reason || 'Does not meet requirements' });
+    vRefetch();
+    rRefetch();
+  };
+
+  const save = async (id: string, data: any) => {
+    await vendorApi.update(id, data);
+    vRefetch();
+  };
+
+  const handleReview = (v: any) => {
+    let originalData = v;
+    if (v.isRequest) {
+       originalData = allRequests.find((r: any) => r.id === v.id) || v;
+       originalData.isRequest = true;
+    }
+    setSelectedVendor(originalData);
+    setDrawerMode('review');
+    setIsDrawerOpen(true);
+  };
+
+  const handleView = (v: any) => {
+    setSelectedVendor(v);
+    setDrawerMode('view');
+    setIsDrawerOpen(true);
+  };
+
+  const handleEdit = (v: any) => {
+    setSelectedVendor(v);
+    setDrawerMode('edit');
+    setIsDrawerOpen(true);
   };
 
   const statusCounts = {
-    all: allVendors.length,
-    pending: allVendors.filter(v => v.status === 'PENDING').length,
-    approved: allVendors.filter(v => v.status === 'APPROVED').length,
+    all: mergedList.length,
+    pending: mergedList.filter(v => v.status === 'PENDING').length,
+    approved: mergedList.filter(v => v.status === 'APPROVED').length,
   };
 
-  const displayedVendors = allVendors
+  const displayedVendors = mergedList
     .filter(v => (filter ? v.status === filter : true))
     .filter(v => v.shopName.toLowerCase().includes(search.toLowerCase()) || v.email.toLowerCase().includes(search.toLowerCase()));
 
@@ -41,15 +95,34 @@ export default function VendorsPage() {
     },
     {
       key: 'shop',
-      header: 'Shop',
+      header: 'SHOP',
       cell: (v) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600 shrink-0">
-            <Store size={14} strokeWidth={2.5} />
-          </div>
-          <span className="font-bold text-slate-900">{v.shopName}</span>
+          {v.logoUrl ? (
+            <img src={v.logoUrl} alt={v.shopName} className="w-8 h-8 rounded-lg object-cover bg-slate-100 shrink-0" />
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+              <span className="font-bold">{v.shopName.charAt(0).toUpperCase()}</span>
+            </div>
+          )}
+          <span className="font-medium text-slate-800">{v.shopName}</span>
         </div>
       )
+    },
+    {
+      key: 'code',
+      header: 'CODE',
+      cell: (v) => <span className="text-xs text-slate-500 font-mono font-medium">{v.code || 'NO-CODE'}</span>
+    },
+    {
+      key: 'products',
+      header: 'PRODUCTS',
+      cell: (v) => <span className="text-slate-600">{v.productsCount || 0} items</span>
+    },
+    {
+      key: 'turnover',
+      header: 'TURNOVER',
+      cell: (v) => <span className="font-medium text-slate-700">₹ {Number(v.turnover || 0).toLocaleString()}</span>
     },
     {
       key: 'email',
@@ -85,26 +158,27 @@ export default function VendorsPage() {
       cell: (v) => (
         <div className="flex items-center gap-2">
           {v.status === 'PENDING' ? (
-            <>
-              <button
-                className="flex items-center gap-1.5 h-8 px-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-700 text-xs font-bold cursor-pointer hover:bg-emerald-100 transition-colors"
-                title="Approve" onClick={() => approve(v.id)}
-              >
-                <Check size={13} strokeWidth={3} /> Approve
-              </button>
-              <button
-                className="flex items-center gap-1.5 h-8 px-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-xs font-bold cursor-pointer hover:bg-red-100 transition-colors"
-                title="Reject" onClick={() => reject(v.id)}
-              >
-                <X size={13} strokeWidth={3} /> Reject
-              </button>
-            </>
+            <button
+              className="flex items-center gap-1.5 h-8 px-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-xs font-bold cursor-pointer hover:bg-blue-100 transition-colors"
+              title="Review Request" 
+              onClick={() => handleReview(v)}
+            >
+              <Eye size={13} strokeWidth={3} /> Review
+            </button>
           ) : (
             <>
-              <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors" title="View">
+              <button 
+                className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors" 
+                title="View"
+                onClick={() => handleView(v)}
+              >
                 <Eye size={14} strokeWidth={2.5} />
               </button>
-              <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors" title="Edit">
+              <button 
+                className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors" 
+                title="Edit"
+                onClick={() => handleEdit(v)}
+              >
                 <Edit size={14} strokeWidth={2.5} />
               </button>
               <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-red-400 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors" title="Delete">
@@ -143,7 +217,7 @@ export default function VendorsPage() {
       <DataTable 
         columns={columns}
         data={displayedVendors}
-        loading={loading}
+        loading={vLoading || rLoading}
         emptyState={
           <EmptyState 
             icon={Store} 
@@ -161,6 +235,16 @@ export default function VendorsPage() {
             />
           )
         }
+      />
+      
+      <VendorReviewDrawer 
+        isOpen={isDrawerOpen} 
+        onClose={() => setIsDrawerOpen(false)} 
+        vendor={selectedVendor} 
+        mode={drawerMode}
+        onApprove={approve} 
+        onReject={reject} 
+        onSave={save}
       />
     </div>
   );

@@ -15,6 +15,8 @@ export default function SettingsPage() {
     // General
     minOrderValue: '99',
     taxPercent: '5',
+    platformFee: '5',
+    deliveryFee: '0',
     
     // Platform
     platformName: 'All Time Market',
@@ -99,6 +101,8 @@ export default function SettingsPage() {
     settingsApi.get().then((res) => {
       if (res.data.minOrderValue) handleChange('minOrderValue', String(res.data.minOrderValue));
       if (res.data.taxPercent) handleChange('taxPercent', String(res.data.taxPercent));
+      if (res.data.platformFee !== undefined) handleChange('platformFee', String(res.data.platformFee));
+      if (res.data.deliveryFee !== undefined) handleChange('deliveryFee', String(res.data.deliveryFee));
     }).catch(() => {});
   }, []);
 
@@ -107,6 +111,8 @@ export default function SettingsPage() {
       await settingsApi.update({
         minOrderValue: Number(formData.minOrderValue),
         taxPercent: Number(formData.taxPercent),
+        platformFee: Number(formData.platformFee),
+        deliveryFee: Number(formData.deliveryFee),
       });
       alert('Settings saved successfully!');
     } catch (err) {
@@ -233,6 +239,8 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                 <Input label="Minimum Order Value (₹)" keyName="minOrderValue" desc="Minimum order value required for checkout" />
                 <Input label="Tax Percent (%)" keyName="taxPercent" desc="Tax percentage applied to all orders" />
+                <Input label="Platform Fee (₹)" keyName="platformFee" desc="Fixed fee charged per order" />
+                <Input label="Delivery Fee (₹)" keyName="deliveryFee" desc="Delivery fee (0 = FREE)" />
               </div>
 
               <div className="border-t border-slate-100 my-4"></div>
