@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, Edit, Trash2, Tag, Plus, X, Power, PowerOff } from 'lucide-react';
+import { Eye, Edit, Trash2, Tag, Plus, X, Power, PowerOff, Loader2 } from 'lucide-react';
 import { categoryApi } from '../api';
 import { useApiData } from '../hooks';
 import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal, ImageUpload } from '../components/ui';

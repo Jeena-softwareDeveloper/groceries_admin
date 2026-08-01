@@ -111,7 +111,7 @@ export default function Layout() {
           {isOpen && (
             <div className="flex flex-col min-w-0">
               <strong className="text-[12px] font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-[110px]">
-                {user?.name || 'Super Admin'}
+                {user?.name || 'Admin'}
               </strong>
               <span className="text-[9px] text-slate-300 whitespace-nowrap overflow-hidden text-ellipsis max-w-[110px]">
                 {user?.email || 'admin@districtmart.com'}
@@ -195,8 +195,8 @@ export default function Layout() {
                 {user?.name ? user.name.substring(0, 2).toUpperCase() : 'SA'}
               </div>
               <div className="hidden md:flex flex-col">
-                <span className="text-[12px] font-semibold text-slate-900 leading-tight">{user?.name || 'Super Admin'}</span>
-                <span className="text-[10px] text-slate-500 leading-tight">Super Admin</span>
+                <span className="text-[12px] font-semibold text-slate-900 leading-tight">{user?.name || 'Admin'}</span>
+                <span className="text-[10px] text-slate-500 leading-tight">Admin</span>
               </div>
             </div>
           </div>

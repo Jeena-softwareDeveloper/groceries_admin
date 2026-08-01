@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Store, Users, Check, X, Eye, Edit, Trash2, Plus } from 'lucide-react';
+import { Store, Users, Check, X, Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
 import { vendorApi, vendorRequestApi } from '../api';
 import { useApiData } from '../hooks';
 import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer } from '../components/ui';
@@ -10,6 +10,7 @@ export default function VendorsPage() {
   const [search, setSearch] = useState('');
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [drawerMode, setDrawerMode] = useState<'review' | 'view' | 'edit'>('review');
   
   const { data: allVendors = [], loading: vLoading, refetch: vRefetch } = useApiData(() => vendorApi.getAll());
@@ -73,6 +74,26 @@ export default function VendorsPage() {
     setSelectedVendor(v);
     setDrawerMode('edit');
     setIsDrawerOpen(true);
+  };
+
+  const handleDelete = async (v: any) => {
+    if (window.confirm(`Are you sure you want to delete "${v.shopName}"? This action cannot be undone.`)) {
+      setDeletingId(v.id);
+      try {
+        if (!v.isRequest) {
+          await vendorApi.delete(v.id);
+        } else {
+          // If it's a request, just reject it or skip (backend might not support delete request yet)
+          alert('Cannot delete pending requests, please reject them instead.');
+        }
+        vRefetch();
+        rRefetch();
+      } catch (e: any) {
+        alert(e.message || 'Failed to delete vendor');
+      } finally {
+        setDeletingId(null);
+      }
+    }
   };
 
   const statusCounts = {
@@ -181,8 +202,13 @@ export default function VendorsPage() {
               >
                 <Edit size={14} strokeWidth={2.5} />
               </button>
-              <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-red-400 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors" title="Delete">
-                <Trash2 size={14} strokeWidth={2.5} />
+              <button 
+                className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-red-400 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors disabled:opacity-50" 
+                title="Delete"
+                onClick={() => handleDelete(v)}
+                disabled={deletingId === v.id}
+              >
+                {deletingId === v.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} strokeWidth={2.5} />}
               </button>
             </>
           )}
@@ -216,7 +242,7 @@ export default function VendorsPage() {
 
       <DataTable 
         columns={columns}
-        data={displayedVendors}
+        data={displayedVendors as any}
         loading={vLoading || rLoading}
         emptyState={
           <EmptyState 

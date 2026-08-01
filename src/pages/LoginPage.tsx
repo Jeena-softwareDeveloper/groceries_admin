@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  ShoppingBasket, Store, Package, BarChart3, ShieldCheck, Mail, Lock, Eye, EyeOff, AlertCircle, ShoppingBag, Leaf
+  Store, Package, BarChart3, ShieldCheck, Mail, Lock, Eye, EyeOff, AlertCircle, Loader2
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -46,7 +46,7 @@ export default function LoginPage() {
           
           <div className="h-px bg-white/20 w-full mb-8"></div>
           
-          <h2 className="text-2xl font-bold m-0 mb-3">Super Admin Panel</h2>
+          <h2 className="text-2xl font-bold m-0 mb-3">Admin Panel</h2>
           <p className="text-base leading-relaxed opacity-90 m-0 mb-10">Manage vendors, products, orders and customers across all districts.</p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full text-left">
@@ -98,7 +98,7 @@ export default function LoginPage() {
         <div className="w-full max-w-[440px]">
           <div className="inline-flex items-center gap-1.5 text-green-600 border border-green-200 bg-green-50 px-3 py-1.5 rounded-full text-xs font-bold uppercase mb-6">
             <ShieldCheck size={16} />
-            SUPER ADMIN
+            ADMIN
           </div>
           
           <h1 className="text-4xl font-extrabold text-slate-900 m-0 mb-2">Welcome <span className="text-green-600">Back!</span></h1>
@@ -163,8 +163,17 @@ export default function LoginPage() {
             </div>
 
             <button type="submit" className="w-full flex items-center justify-center gap-2 bg-green-600 text-white border-none py-3.5 rounded-lg text-base font-semibold cursor-pointer hover:bg-green-700 transition-colors disabled:opacity-70 disabled:cursor-not-allowed" disabled={loading}>
-              <Lock size={18} />
-              {loading ? 'Signing in…' : 'Sign In'}
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Signing in…
+                </>
+              ) : (
+                <>
+                  <Lock size={18} />
+                  Sign In
+                </>
+              )}
             </button>
           </form>
 

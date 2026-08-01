@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
 import { PageHeader, DataTable, ColumnDef, Modal, ProductReviewDrawer, EditProductDrawer } from '../components/ui';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, Search, Loader2 } from 'lucide-react';
 
 interface ProductApproval {
   id: string;
@@ -26,6 +26,8 @@ export default function ProductApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('PENDING');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
   const [viewProduct, setViewProduct] = useState<ProductApproval | null>(null);
@@ -56,7 +58,7 @@ export default function ProductApprovalsPage() {
     } catch (e: any) {
       alert(e.response?.data?.error?.message || 'Error approving product');
       throw e;
-    }
+    } finally { setIsSubmitting(false); }
   };
 
   const handleReject = async (id: string, reason: string) => {
@@ -66,7 +68,7 @@ export default function ProductApprovalsPage() {
     } catch (e: any) {
       alert(e.response?.data?.error?.message || 'Error rejecting product');
       throw e;
-    }
+    } finally { setIsSubmitting(false); }
   };
 
   const handleRequestChanges = async (id: string, notesStr: string) => {
@@ -76,7 +78,7 @@ export default function ProductApprovalsPage() {
     } catch (e: any) {
       alert(e.response?.data?.error?.message || 'Error requesting changes');
       throw e;
-    }
+    } finally { setIsSubmitting(false); }
   };
 
   const handleDelete = async (item: ProductApproval) => {
@@ -87,7 +89,7 @@ export default function ProductApprovalsPage() {
       alert('Product deleted successfully');
     } catch (e: any) {
       alert(e.response?.data?.error?.message || 'Failed to delete product');
-    }
+    } finally { setDeletingId(null); }
   };
 
   const handleEditSuccess = (updatedItem: ProductApproval) => {

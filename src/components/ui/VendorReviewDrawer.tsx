@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Check, FileText, Image as ImageIcon, MapPin, Building, CreditCard, AlertCircle, Save } from 'lucide-react';
+import { X, Check, FileText, Image as ImageIcon, MapPin, Building, CreditCard, AlertCircle, Save, Loader2 } from 'lucide-react';
 
 export type DrawerMode = 'review' | 'view' | 'edit';
 
@@ -272,7 +272,9 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
                     disabled={!rejectReason.trim() || loading}
                     className="flex-1 h-10 bg-red-600 text-white border border-transparent rounded-lg font-semibold text-[13px] hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {loading ? 'Rejecting...' : 'Confirm Reject'}
+                    {loading ? (
+                      <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Rejecting...</span>
+                    ) : 'Confirm Reject'}
                   </button>
                 </div>
               </div>
@@ -290,7 +292,9 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
                   disabled={loading}
                   className="flex-[2] h-11 bg-emerald-600 border border-transparent text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors shadow-sm cursor-pointer disabled:opacity-70 disabled:cursor-wait"
                 >
-                  {loading ? 'Processing...' : (
+                  {loading ? (
+                    <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Processing...</span>
+                  ) : (
                     <>
                       <Check size={18} strokeWidth={3} />
                       Approve Vendor
@@ -308,7 +312,9 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
                 disabled={loading}
                 className="w-full h-11 bg-slate-900 border border-transparent text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors shadow-sm cursor-pointer disabled:opacity-70 disabled:cursor-wait"
               >
-                {loading ? 'Saving...' : (
+                {loading ? (
+                  <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Saving...</span>
+                ) : (
                   <>
                     <Save size={18} strokeWidth={2.5} />
                     Save Changes

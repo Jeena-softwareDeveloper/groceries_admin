@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Globe, Plus, X, Eye, Edit, Trash2 } from 'lucide-react';
+import { Globe, Plus, X, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
 import { districtApi } from '../api';
 import { useApiData } from '../hooks';
 import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal } from '../components/ui';
@@ -18,6 +18,15 @@ export default function DistrictsPage() {
     setName('');
     setShowForm(false);
     refetch();
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await districtApi.delete(id);
+      refetch();
+    } catch (error: any) {
+      alert(error?.response?.data?.error?.message || error?.response?.data?.message || 'Failed to delete district');
+    }
   };
 
   const filteredDistricts = districts.filter(d => 
@@ -99,7 +108,7 @@ export default function DistrictsPage() {
       header: 'Actions',
       headerClassName: 'pr-6',
       cellClassName: 'pr-6',
-      cell: () => (
+      cell: (d) => (
         <div className="flex items-center gap-2">
           <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors">
             <Eye size={14} strokeWidth={2.5} />
@@ -107,7 +116,10 @@ export default function DistrictsPage() {
           <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors">
             <Edit size={14} strokeWidth={2.5} />
           </button>
-          <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-red-400 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors">
+          <button 
+            onClick={() => handleDelete(d.id)}
+            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-red-400 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors"
+          >
             <Trash2 size={14} strokeWidth={2.5} />
           </button>
         </div>
