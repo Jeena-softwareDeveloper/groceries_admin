@@ -661,7 +661,7 @@ export function OffersPage() {
 }
 
 export function CouponsPage() {
-  const [coupons, setCoupons] = useState<Array<{ id: string; code: string; discountValue: number; isActive: boolean }>>([]);
+  const [coupons, setCoupons] = useState<Array<{ id: string; code: string; discountAmt: number; isActive: boolean }>>([]);
   const [code, setCode] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -746,7 +746,7 @@ export function CouponsPage() {
                 <tr key={c.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                   <td className="p-4 text-sm font-medium text-slate-900">{i + 1}</td>
                   <td className="p-4 text-sm align-middle"><span className="bg-green-100 text-green-800 border border-dashed border-green-400 px-2 py-1 rounded text-xs font-bold uppercase">{c.code}</span></td>
-                  <td className="p-4 text-sm font-semibold text-green-600">₹{c.discountValue} Off</td>
+                  <td className="p-4 text-sm font-semibold text-green-600">₹{c.discountAmt} Off</td>
                   <td className="p-4 text-sm align-middle">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${c.isActive !== false ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
                       {c.isActive !== false ? 'Active' : 'Inactive'}

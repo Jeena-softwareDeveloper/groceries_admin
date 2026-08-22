@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard, MapPin, Map, Grid, Store, Image, Layers, Truck, Tag, Ticket, BarChart3, Users, Bell, Settings, LogOut, Search, HelpCircle, Menu, ClipboardList, X
+  LayoutDashboard, MapPin, Map, Grid, Store, Image, Layers, Truck, Tag, Ticket, BarChart3, Users, Bell, Settings, LogOut, Search, HelpCircle, Menu, ClipboardList, X, FileText
 } from 'lucide-react';
 
 
@@ -23,6 +23,7 @@ const navItems = [
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/customers', label: 'Customers', icon: Users },
   { path: '/notifications', label: 'Notifications', icon: Bell },
+  { path: '/audit-logs', label: 'Audit Logs', icon: FileText },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
