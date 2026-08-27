@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Eye, Edit, Trash2, Tag, Plus, X, Power, PowerOff, Loader2 } from 'lucide-react';
 import { categoryApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal, ImageUpload } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal, ImageUpload, ConfirmModal } from '../components/ui';
 import type { Category } from '../types';
 
 export default function CategoriesPage() {
@@ -50,11 +50,18 @@ export default function CategoriesPage() {
     refetch();
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-      await categoryApi.delete(id);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, id: string | null}>({isOpen: false, id: null});
+
+  const handleDelete = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
+  };
+
+  const executeDelete = async () => {
+    if (confirmModal.id) {
+      await categoryApi.delete(confirmModal.id);
       refetch();
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
   
   const handleToggleStatus = async (c: Category) => {
@@ -309,6 +316,16 @@ export default function CategoriesPage() {
             />
           )
         }
+      />
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={executeDelete}
+        title="Delete Category"
+        message="Are you sure you want to delete this category?"
+        confirmText="Delete"
+        isDestructive={true}
       />
     </div>
   );

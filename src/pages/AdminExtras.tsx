@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { adminExtrasApi } from '../api';
 import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, ChevronLeft, ChevronRight, Ban, Send, Check } from 'lucide-react';
-import { Modal, ImageUpload, PageHeader } from '../components/ui';
+import { Modal, ImageUpload, PageHeader, ConfirmModal } from '../components/ui';
+import { toast } from 'sonner';
 
 // Generic Pagination component to avoid repetition
 const Pagination = ({ count }: { count: number }) => (
@@ -21,35 +22,51 @@ const Pagination = ({ count }: { count: number }) => (
 );
 
 export function BannersPage() {
-  const [banners, setBanners] = useState<Array<{ id: string; title: string; imageUrl: string; themeColor?: string; themeColorEnd?: string; isActive: boolean }>>([]);
-  const [title, setTitle] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [themeColor, setThemeColor] = useState('#16a34a');
-  const [themeColorEnd, setThemeColorEnd] = useState('#4ade80'); // lighter shade by default
+  const [banners, setBanners] = useState<Array<any>>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Form state
+  const [title, setTitle] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [type, setType] = useState<'IMAGE' | 'VIDEO'>('IMAGE');
+  const [row, setRow] = useState(1);
+  const [themeColor, setThemeColor] = useState('#16a34a');
+  const [themeColorEnd, setThemeColorEnd] = useState('#4ade80');
 
   const load = () => adminExtrasApi.banners.getAll().then((r) => setBanners(r.data));
   useEffect(() => { load(); }, []);
 
+  const resetForm = () => {
+    setTitle(''); setImageUrl(''); setVideoUrl('');
+    setType('IMAGE'); setRow(1);
+    setThemeColor('#16a34a'); setThemeColorEnd('#4ade80');
+    setEditingId(null);
+  };
+
   const createOrUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        title,
+        imageUrl: imageUrl || 'https://placehold.co/800x300',
+        videoUrl: videoUrl || null,
+        type, row,
+        themeColor, themeColorEnd,
+        isActive: true
+      };
       if (editingId) {
-        await adminExtrasApi.banners.update(editingId, { title, imageUrl: imageUrl || 'https://placehold.co/800x300', themeColor, themeColorEnd, isActive: true });
+        await adminExtrasApi.banners.update(editingId, payload);
       } else {
-        await adminExtrasApi.banners.create({ title, imageUrl: imageUrl || 'https://placehold.co/800x300', themeColor, themeColorEnd, isActive: true });
+        await adminExtrasApi.banners.create(payload);
       }
-      setTitle('');
-      setImageUrl('');
-      setThemeColor('#16a34a');
-      setThemeColorEnd('#4ade80');
-      setEditingId(null);
+      resetForm();
       setShowForm(false);
       load();
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || JSON.stringify(err);
-      alert('Failed to save banner: ' + msg);
+      toast.error('Failed to save banner: ' + msg);
     }
   };
 
@@ -57,136 +74,213 @@ export function BannersPage() {
     setEditingId(b.id);
     setTitle(b.title);
     setImageUrl(b.imageUrl || '');
+    setVideoUrl(b.videoUrl || '');
+    setType(b.type || 'IMAGE');
+    setRow(b.row || 1);
     setThemeColor(b.themeColor || '#16a34a');
     setThemeColorEnd(b.themeColorEnd || '#4ade80');
     setShowForm(true);
   };
 
-  const handleAdd = () => {
-    setEditingId(null);
-    setTitle('');
-    setImageUrl('');
-    setThemeColor('#16a34a');
-    setThemeColorEnd('#4ade80');
-    setShowForm(!showForm);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, id: string | null}>({isOpen: false, id: null});
+
+  const remove = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
   };
 
-  const remove = async (id: string) => {
-    if (confirm('Are you sure you want to delete this banner?')) {
-      await adminExtrasApi.banners.delete(id);
+  const executeDelete = async () => {
+    if (confirmModal.id) {
+      await adminExtrasApi.banners.delete(confirmModal.id);
       load();
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
+
+  const rowLabels: Record<number, { label: string; desc: string; color: string }> = {
+    1: { label: 'Row 1 — Video Banner', desc: 'Full-width video at the top of the home screen', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    2: { label: 'Row 2 — Dual Images', desc: 'Two side-by-side promotional images', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    3: { label: 'Row 3 — Wide Image', desc: 'Full-width promotional banner image', color: 'bg-green-100 text-green-700 border-green-200' },
+  };
+
+  const rows = [1, 2, 3];
 
   return (
     <div className="text-slate-900">
-            <PageHeader 
+      <PageHeader
         title="Banners"
         description=""
         action={
-          <div className="flex items-center gap-3">
-            
-          <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={handleAdd}>
+          <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={() => { resetForm(); setShowForm(true); }}>
             <Plus size={16} /> Add Banner
           </button>
-          </div>
         }
       />
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} title={editingId ? 'Edit Banner' : 'Add Banner'}>
+
+      {/* 3-Row Info Cards */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {rows.map(r => {
+          const info = rowLabels[r];
+          const count = banners.filter(b => (b.row ?? 1) === r).length;
+          return (
+            <div key={r} className={`border rounded-lg p-4 ${info.color}`}>
+              <div className="font-bold text-sm mb-1">{info.label}</div>
+              <div className="text-xs opacity-80 mb-2">{info.desc}</div>
+              <div className="font-bold text-2xl">{count}</div>
+              <div className="text-xs opacity-70">banners</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Modal isOpen={showForm} onClose={() => { setShowForm(false); resetForm(); }} title={editingId ? 'Edit Banner' : 'Add Banner'}>
         <form className="flex flex-col gap-4" onSubmit={createOrUpdate}>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
-            <input className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all" placeholder="Enter title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <label className="block text-sm font-medium text-slate-700 mb-1">Banner Row</label>
+            <select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600" value={row} onChange={(e) => setRow(Number(e.target.value))}>
+              <option value={1}>Row 1 — Video Banner (Top video)</option>
+              <option value={2}>Row 2 — Dual Images (Left & Right side-by-side)</option>
+              <option value={3}>Row 3 — Wide Image (Full-width banner)</option>
+            </select>
+            <p className="text-xs text-slate-400 mt-1">{rowLabels[row]?.desc}</p>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Image</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Banner Type</label>
+            <div className="flex gap-3">
+              <label className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium transition-all ${type === 'IMAGE' ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 text-slate-600'}`}>
+                <input type="radio" value="IMAGE" checked={type === 'IMAGE'} onChange={() => setType('IMAGE')} className="sr-only" />
+                🖼 Image
+              </label>
+              {row === 1 && (
+                <label className={`flex items-center gap-2 px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium transition-all ${type === 'VIDEO' ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 text-slate-600'}`}>
+                  <input type="radio" value="VIDEO" checked={type === 'VIDEO'} onChange={() => setType('VIDEO')} className="sr-only" />
+                  🎬 Video
+                </label>
+              )}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
+            <input className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all" placeholder="Enter banner title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          </div>
+          {type === 'VIDEO' ? (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Video File</label>
+              <ImageUpload value={videoUrl} onChange={setVideoUrl} folder="districtmart-videos" />
+              <p className="text-xs text-slate-400 mt-1">Upload an MP4 video (max 50MB).</p>
+            </div>
+          ) : null}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{type === 'VIDEO' ? 'Thumbnail / Poster Image' : 'Banner Image'}</label>
             <ImageUpload value={imageUrl} onChange={setImageUrl} folder="districtmart-banners" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Header Gradient Colors</label>
-            {/* Live gradient preview */}
-            <div
-              className="w-full h-12 rounded-lg mb-3 border border-slate-200"
-              style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColorEnd})` }}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Start Color</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={themeColor} onChange={(e) => setThemeColor(e.target.value)} className="w-9 h-9 p-0.5 border border-slate-200 rounded cursor-pointer flex-shrink-0" />
-                  <input type="text" value={themeColor} onChange={(e) => setThemeColor(e.target.value)} className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs outline-none uppercase font-mono min-w-0" placeholder="#HEX" />
+          {row === 1 && (
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Header Gradient Colors</label>
+              <div className="w-full h-10 rounded-lg mb-3 border border-slate-200" style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColorEnd})` }} />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Start Color</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={themeColor} onChange={(e) => setThemeColor(e.target.value)} className="w-9 h-9 p-0.5 border border-slate-200 rounded cursor-pointer flex-shrink-0" />
+                    <input type="text" value={themeColor} onChange={(e) => setThemeColor(e.target.value)} className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs outline-none uppercase font-mono min-w-0" placeholder="#HEX" />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">End Color</label>
-                <div className="flex items-center gap-2">
-                  <input type="color" value={themeColorEnd} onChange={(e) => setThemeColorEnd(e.target.value)} className="w-9 h-9 p-0.5 border border-slate-200 rounded cursor-pointer flex-shrink-0" />
-                  <input type="text" value={themeColorEnd} onChange={(e) => setThemeColorEnd(e.target.value)} className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs outline-none uppercase font-mono min-w-0" placeholder="#HEX" />
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">End Color</label>
+                  <div className="flex items-center gap-2">
+                    <input type="color" value={themeColorEnd} onChange={(e) => setThemeColorEnd(e.target.value)} className="w-9 h-9 p-0.5 border border-slate-200 rounded cursor-pointer flex-shrink-0" />
+                    <input type="text" value={themeColorEnd} onChange={(e) => setThemeColorEnd(e.target.value)} className="flex-1 px-2 py-1.5 border border-slate-200 rounded-lg text-xs outline-none uppercase font-mono min-w-0" placeholder="#HEX" />
+                  </div>
                 </div>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">🎨 These 2 colors create a gradient for the app's top header when this banner is active.</p>
-          </div>
-          <div className="flex justify-end gap-3 mt-4">
-            <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
+          )}
+          <div className="flex justify-end gap-3 mt-2">
+            <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">Cancel</button>
             <button type="submit" className="bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700">{editingId ? 'Update Banner' : 'Save Banner'}</button>
           </div>
         </form>
       </Modal>
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-        <div className="overflow-x-auto w-full">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap">#</th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap"><div className="inline-flex items-center gap-1.5">Image <ChevronsUpDown size={14} className="text-slate-400" /></div></th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap"><div className="inline-flex items-center gap-1.5">Title <ChevronsUpDown size={14} className="text-slate-400" /></div></th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap">Color</th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap"><div className="inline-flex items-center gap-1.5">Status <ChevronsUpDown size={14} className="text-slate-400" /></div></th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {banners.map((b, i) => (
-                <tr key={b.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                  <td className="p-4 text-sm font-medium text-slate-900">{i + 1}</td>
-                  <td className="p-4"><img src={b.imageUrl || "https://placehold.co/100x40"} alt="Banner" className="rounded border border-slate-200 max-w-[100px] max-h-[40px] object-cover" /></td>
-                  <td className="p-4 text-sm font-medium text-slate-900">{b.title}</td>
-                  <td className="p-4">
-                    {b.themeColor ? (
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-24 h-6 rounded-full border border-slate-200 flex-shrink-0"
-                          style={{
-                            background: b.themeColorEnd
-                              ? `linear-gradient(90deg, ${b.themeColor}, ${b.themeColorEnd})`
-                              : b.themeColor
-                          }}
-                        />
-                      </div>
-                    ) : <span className="text-slate-400">-</span>}
-                  </td>
-                  <td className="p-4 text-sm align-middle">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${b.isActive !== false ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
-                      {b.isActive !== false ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-sm align-middle">
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => handleEdit(b)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-500 cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-colors"><Edit size={14} /></button>
-                      <button onClick={() => remove(b.id)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-red-600 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors"><Trash2 size={14} /></button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Pagination count={banners.length} />
-      </div>
+
+      {/* Row-grouped banner list */}
+      {rows.map(r => {
+        const rowBanners = banners.filter(b => (b.row ?? 1) === r);
+        const info = rowLabels[r];
+        return (
+          <div key={r} className="mb-6">
+            <div className="flex items-center gap-3 mb-3">
+              <h3 className={`text-sm font-bold px-3 py-1.5 rounded-full border ${info.color}`}>{info.label}</h3>
+              <span className="text-xs text-slate-400">{info.desc}</span>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+              {rowBanners.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-sm">
+                  No banners for this row. Click "Add Banner" to create one.
+                </div>
+              ) : (
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="p-4 text-left text-xs font-bold text-slate-900">#</th>
+                        <th className="p-4 text-left text-xs font-bold text-slate-900">Preview</th>
+                        <th className="p-4 text-left text-xs font-bold text-slate-900">Title</th>
+                        <th className="p-4 text-left text-xs font-bold text-slate-900">Type</th>
+                        <th className="p-4 text-left text-xs font-bold text-slate-900">Status</th>
+                        <th className="p-4 text-left text-xs font-bold text-slate-900">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rowBanners.map((b, i) => (
+                        <tr key={b.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+                          <td className="p-4 text-sm font-medium text-slate-900">{i + 1}</td>
+                          <td className="p-4">
+                            {b.type === 'VIDEO' ? (
+                              <div className="flex items-center gap-2">
+                                <img src={b.imageUrl || 'https://placehold.co/100x40'} alt="Thumb" className="rounded border border-slate-200 w-[80px] h-[40px] object-cover" />
+                                <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">VIDEO</span>
+                              </div>
+                            ) : (
+                              <img src={b.imageUrl || 'https://placehold.co/100x40'} alt="Banner" className="rounded border border-slate-200 max-w-[100px] max-h-[40px] object-cover" />
+                            )}
+                          </td>
+                          <td className="p-4 text-sm font-medium text-slate-900">{b.title}</td>
+                          <td className="p-4 text-xs font-medium text-slate-500">{b.type || 'IMAGE'}</td>
+                          <td className="p-4 text-sm align-middle">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${b.isActive !== false ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
+                              {b.isActive !== false ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td className="p-4 text-sm align-middle">
+                            <div className="flex items-center gap-2">
+                              <button onClick={() => handleEdit(b)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-500 cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-colors"><Edit size={14} /></button>
+                              <button onClick={() => remove(b.id)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-red-600 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors"><Trash2 size={14} /></button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={executeDelete}
+        title="Delete Banner"
+        message="Are you sure you want to delete this banner?"
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }
+
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Array<{ id: string; phone: string; name?: string; isBlocked: boolean }>>([]);
@@ -273,7 +367,7 @@ export function MicroBannersPage() {
       setShowForm(false);
       load();
     } catch (err: any) {
-      alert('Failed: ' + (err?.response?.data?.error || err.message));
+      toast.error('Failed: ' + (err?.response?.data?.error || err.message));
     }
   };
 
@@ -289,11 +383,18 @@ export function MicroBannersPage() {
     setShowForm(true);
   };
 
-  const remove = async (id: string) => {
-    if (confirm('Delete this micro banner?')) {
-      await adminExtrasApi.microBanners.delete(id);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, id: string | null}>({isOpen: false, id: null});
+
+  const remove = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
+  };
+
+  const executeDelete = async () => {
+    if (confirmModal.id) {
+      await adminExtrasApi.microBanners.delete(confirmModal.id);
       load();
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
 
   return (
@@ -357,6 +458,16 @@ export function MicroBannersPage() {
         </div>
         <Pagination count={items.length} />
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={executeDelete}
+        title="Delete Micro Banner"
+        message="Are you sure you want to delete this micro banner?"
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }
@@ -403,7 +514,7 @@ export function DeliveryChargesPage() {
       setShowForm(false);
       load();
     } catch (err: any) {
-      alert('Failed: ' + (err?.response?.data?.error || err.message));
+      toast.error('Failed: ' + (err?.response?.data?.error || err.message));
     }
   };
 
@@ -433,11 +544,18 @@ export function DeliveryChargesPage() {
     setShowForm(true);
   };
 
-  const remove = async (id: string) => {
-    if (confirm('Delete this rule?')) {
-      await adminExtrasApi.deliveryCharges.delete(id);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, id: string | null}>({isOpen: false, id: null});
+
+  const remove = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
+  };
+
+  const executeDelete = async () => {
+    if (confirmModal.id) {
+      await adminExtrasApi.deliveryCharges.delete(confirmModal.id);
       load();
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
 
   return (
@@ -547,6 +665,16 @@ export function DeliveryChargesPage() {
         </div>
         <Pagination count={rules.length} />
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={executeDelete}
+        title="Delete Delivery Rule"
+        message="Are you sure you want to delete this rule?"
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }
@@ -573,7 +701,7 @@ export function OffersPage() {
       setShowForm(false);
       load();
     } catch (err: any) {
-      alert('Failed: ' + (err?.response?.data?.error || err.message));
+      toast.error('Failed: ' + (err?.response?.data?.error || err.message));
     }
   };
 
@@ -589,11 +717,18 @@ export function OffersPage() {
     setShowForm(true);
   };
 
-  const remove = async (id: string) => {
-    if (confirm('Delete this offer?')) {
-      await adminExtrasApi.offers.delete(id);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, id: string | null}>({isOpen: false, id: null});
+
+  const remove = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
+  };
+
+  const executeDelete = async () => {
+    if (confirmModal.id) {
+      await adminExtrasApi.offers.delete(confirmModal.id);
       load();
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
 
   return (
@@ -656,6 +791,16 @@ export function OffersPage() {
         </div>
         <Pagination count={offers.length} />
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={executeDelete}
+        title="Delete Offer"
+        message="Are you sure you want to delete this offer?"
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }
@@ -682,7 +827,7 @@ export function CouponsPage() {
       setShowForm(false);
       load();
     } catch (err: any) {
-      alert('Failed: ' + (err?.response?.data?.error || err.message));
+      toast.error('Failed: ' + (err?.response?.data?.error || err.message));
     }
   };
 
@@ -698,11 +843,18 @@ export function CouponsPage() {
     setShowForm(true);
   };
 
-  const remove = async (id: string) => {
-    if (confirm('Delete this coupon?')) {
-      await adminExtrasApi.coupons.delete(id);
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, id: string | null}>({isOpen: false, id: null});
+
+  const remove = (id: string) => {
+    setConfirmModal({ isOpen: true, id });
+  };
+
+  const executeDelete = async () => {
+    if (confirmModal.id) {
+      await adminExtrasApi.coupons.delete(confirmModal.id);
       load();
     }
+    setConfirmModal({ isOpen: false, id: null });
   };
 
   return (
@@ -765,6 +917,16 @@ export function CouponsPage() {
         </div>
         <Pagination count={coupons.length} />
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, id: null })}
+        onConfirm={executeDelete}
+        title="Delete Coupon"
+        message="Are you sure you want to delete this coupon?"
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }

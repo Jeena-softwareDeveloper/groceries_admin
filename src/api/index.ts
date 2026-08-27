@@ -11,5 +11,4 @@ export * from './admin-extras.api';
 export * from './vendor-request.api';
 export * from './dashboard.api';
 export * from './vendor-dashboard.api';
-
-
+export * from './analytics.api';

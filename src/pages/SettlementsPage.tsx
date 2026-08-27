@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { DataTable, Modal, ColumnDef, PageHeader } from '../components/ui';
+import { toast } from 'sonner';
 import { DollarSign, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 
 interface Settlement {
@@ -56,7 +57,7 @@ export default function SettlementsPage() {
       setBankRef('');
       fetchSettlements();
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Approval failed');
+      toast.error(e instanceof Error ? e.message : 'Approval failed');
     } finally {
       setActionLoading(false);
     }
@@ -69,7 +70,7 @@ export default function SettlementsPage() {
       await api.post(`/admin/settlements/${id}/reject`, { reason });
       fetchSettlements();
     } catch (e) {
-      alert('Rejection failed');
+      toast.error('Rejection failed');
     }
   };
 

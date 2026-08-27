@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
+import { toast } from 'sonner';
 
 interface EditProductDrawerProps {
   isOpen: boolean;
@@ -55,7 +56,7 @@ export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: E
       });
       onClose();
     } catch (err: any) {
-      alert(err.response?.data?.error?.message || 'Failed to update product');
+      toast.error(err.response?.data?.error?.message || 'Failed to update product');
     } finally {
       setLoading(false);
     }

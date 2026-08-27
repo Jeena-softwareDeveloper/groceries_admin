@@ -7,6 +7,7 @@ export * from './VendorReviewDrawer';
 export * from './ProductReviewDrawer';
 export * from './EditProductDrawer';
 export * from './LoadingSkeleton';
+export * from './ConfirmModal';
 export * from './Pagination';
 export * from './DataTable';
 export * from './Modal';

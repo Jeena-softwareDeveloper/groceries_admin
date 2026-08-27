@@ -16,9 +16,12 @@ import AuditLogsPage from './pages/AuditLogsPage';
 
 import { AdminRoute, GuestRoute } from './guards';
 
+import { Toaster } from 'sonner';
+
 export default function App() {
   return (
     <AuthProvider>
+      <Toaster position="top-right" richColors />
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />

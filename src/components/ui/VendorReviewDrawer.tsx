@@ -125,7 +125,7 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
       )}
       {mode === 'edit' && (
         <div className="mt-2">
-          <span className="text-[10px] text-slate-400 italic">Image upload in edit mode requires Cloudinary widget.</span>
+          <span className="text-[10px] text-slate-400 italic">Image upload in edit mode requires image widget.</span>
         </div>
       )}
     </div>

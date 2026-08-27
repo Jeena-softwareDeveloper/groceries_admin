@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { PageHeader, DataTable, ColumnDef, Modal, ProductReviewDrawer, EditProductDrawer } from '../components/ui';
-import { ArrowLeft, Search, Loader2 } from 'lucide-react';
+import { PageHeader, DataTable, ColumnDef, Modal, ProductReviewDrawer, EditProductDrawer, ConfirmModal } from '../components/ui';
+import { toast } from 'sonner';
+import { ArrowLeft, Search, Loader2, Trash2 } from 'lucide-react';
 
 interface ProductApproval {
   id: string;
@@ -56,7 +57,7 @@ export default function ProductApprovalsPage() {
       await api.post(`/admin/product-approvals/${id}/approve`);
       setApprovals(prev => prev.map(a => a.id === id ? { ...a, status: 'APPROVED' } : a));
     } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Error approving product');
+      toast.error(e.response?.data?.error?.message || 'Error approving product');
       throw e;
     } finally { setIsSubmitting(false); }
   };
@@ -66,7 +67,7 @@ export default function ProductApprovalsPage() {
       await api.post(`/admin/product-approvals/${id}/reject`, { reason });
       setApprovals(prev => prev.map(a => a.id === id ? { ...a, status: 'REJECTED', rejectionReason: reason } : a));
     } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Error rejecting product');
+      toast.error(e.response?.data?.error?.message || 'Error rejecting product');
       throw e;
     } finally { setIsSubmitting(false); }
   };
@@ -76,20 +77,30 @@ export default function ProductApprovalsPage() {
       await api.post(`/admin/product-approvals/${id}/request-changes`, { notes: notesStr });
       setApprovals(prev => prev.map(a => a.id === id ? { ...a, status: 'CHANGES_REQUESTED', adminNotes: notesStr } : a));
     } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Error requesting changes');
+      toast.error(e.response?.data?.error?.message || 'Error requesting changes');
       throw e;
     } finally { setIsSubmitting(false); }
   };
 
-  const handleDelete = async (item: ProductApproval) => {
-    if (!window.confirm(`Are you sure you want to delete ${item.product.name}?`)) return;
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, item: ProductApproval | null}>({isOpen: false, item: null});
+
+  const handleDelete = (item: ProductApproval) => {
+    setConfirmModal({ isOpen: true, item });
+  };
+
+  const executeDelete = async () => {
+    const item = confirmModal.item;
+    if (!item) return;
     try {
       await api.delete(`/admin/product-approvals/products/${item.productId}`);
       setApprovals(prev => prev.filter(a => a.productId !== item.productId));
-      alert('Product deleted successfully');
+      toast.success('Product deleted successfully');
     } catch (e: any) {
-      alert(e.response?.data?.error?.message || 'Failed to delete product');
-    } finally { setDeletingId(null); }
+      toast.error(e.response?.data?.error?.message || 'Failed to delete product');
+    } finally { 
+      setDeletingId(null); 
+      setConfirmModal({ isOpen: false, item: null });
+    }
   };
 
   const handleEditSuccess = (updatedItem: ProductApproval) => {

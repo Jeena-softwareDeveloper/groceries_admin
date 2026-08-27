@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { 
   Copy, Wallet, Banknote, Star, Store, Tag, Image as ImageIcon, Truck, Gift,
   UserPlus, ShoppingCart, Package, AlertTriangle, CreditCard, User, FileText, Bell, Mail,
-  UploadCloud, Lock, CheckCircle
+  UploadCloud, Lock, CheckCircle, CheckSquare
 } from 'lucide-react';
 import { settingsApi } from '../api';
+import { toast } from 'sonner';
 import { PageHeader } from '../components/ui';
 
 export default function SettingsPage() {
@@ -41,6 +42,7 @@ export default function SettingsPage() {
     
     // Features
     featMultiVendor: true,
+    featVendorApprovalRequired: true,
     featWallet: true,
     featCod: true,
     featRatings: true,
@@ -99,10 +101,18 @@ export default function SettingsPage() {
 
   useEffect(() => {
     settingsApi.get().then((res) => {
-      if (res.data.minOrderValue) handleChange('minOrderValue', String(res.data.minOrderValue));
-      if (res.data.taxPercent) handleChange('taxPercent', String(res.data.taxPercent));
+      if (res.data.minOrderValue !== undefined) handleChange('minOrderValue', String(res.data.minOrderValue));
+      if (res.data.taxPercent !== undefined) handleChange('taxPercent', String(res.data.taxPercent));
       if (res.data.platformFee !== undefined) handleChange('platformFee', String(res.data.platformFee));
       if (res.data.deliveryFee !== undefined) handleChange('deliveryFee', String(res.data.deliveryFee));
+      if (res.data.featureFlags) {
+        const ff = res.data.featureFlags;
+        if (ff.vendorApprovalRequired !== undefined) handleChange('featVendorApprovalRequired', ff.vendorApprovalRequired);
+        if (ff.multiVendor !== undefined) handleChange('featMultiVendor', ff.multiVendor);
+        if (ff.wallet !== undefined) handleChange('featWallet', ff.wallet);
+        if (ff.cod !== undefined) handleChange('featCod', ff.cod);
+        if (ff.ratings !== undefined) handleChange('featRatings', ff.ratings);
+      }
     }).catch(() => {});
   }, []);
 
@@ -113,11 +123,18 @@ export default function SettingsPage() {
         taxPercent: Number(formData.taxPercent),
         platformFee: Number(formData.platformFee),
         deliveryFee: Number(formData.deliveryFee),
+        featureFlags: {
+          vendorApprovalRequired: formData.featVendorApprovalRequired,
+          multiVendor: formData.featMultiVendor,
+          wallet: formData.featWallet,
+          cod: formData.featCod,
+          ratings: formData.featRatings,
+        }
       });
-      alert('Settings saved successfully!');
+      toast.success('Settings saved successfully!');
     } catch (err) {
       console.error(err);
-      alert('Settings saved (mocked)!');
+      toast.success('Settings saved (mocked)!');
     }
   };
 
@@ -281,6 +298,13 @@ export default function SettingsPage() {
                     <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" className="sr-only peer" checked={formData.featMultiVendor} onChange={() => toggle('featMultiVendor')} /><div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div></label>
                   </div>
                   <div><h4 className="text-sm font-bold text-slate-900 m-0 mb-1">Multi Vendor</h4><p className="text-xs text-slate-500 m-0">Allow multiple vendors</p></div>
+                </div>
+                <div className="border border-slate-200 rounded-lg p-4 flex flex-col items-start gap-4 shadow-sm">
+                  <div className="flex justify-between w-full items-start">
+                    <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center"><CheckSquare size={16} /></div>
+                    <label className="relative inline-flex items-center cursor-pointer"><input type="checkbox" className="sr-only peer" checked={formData.featVendorApprovalRequired} onChange={() => toggle('featVendorApprovalRequired')} /><div className="w-10 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div></label>
+                  </div>
+                  <div><h4 className="text-sm font-bold text-slate-900 m-0 mb-1">Vendor Approval</h4><p className="text-xs text-slate-500 m-0">Require admin approval for vendors</p></div>
                 </div>
               </div>
             </div>

@@ -3,6 +3,7 @@ import { Globe, Plus, X, Eye, Edit, Trash2, Loader2 } from 'lucide-react';
 import { districtApi } from '../api';
 import { useApiData } from '../hooks';
 import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, Modal } from '../components/ui';
+import { toast } from 'sonner';
 import type { District } from '../types';
 
 export default function DistrictsPage() {
@@ -25,7 +26,7 @@ export default function DistrictsPage() {
       await districtApi.delete(id);
       refetch();
     } catch (error: any) {
-      alert(error?.response?.data?.error?.message || error?.response?.data?.message || 'Failed to delete district');
+      toast.error(error?.response?.data?.error?.message || error?.response?.data?.message || 'Failed to delete district');
     }
   };
 

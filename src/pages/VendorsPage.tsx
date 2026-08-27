@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Store, Users, Check, X, Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
 import { vendorApi, vendorRequestApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer, ConfirmModal } from '../components/ui';
+import { toast } from 'sonner';
 import type { Vendor } from '../types';
 
 export default function VendorsPage() {
@@ -12,6 +13,7 @@ export default function VendorsPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [drawerMode, setDrawerMode] = useState<'review' | 'view' | 'edit'>('review');
+  const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, vendor: any | null}>({isOpen: false, vendor: null});
   
   const { data: allVendors = [], loading: vLoading, refetch: vRefetch } = useApiData(() => vendorApi.getAll());
   const { data: requestData, loading: rLoading, refetch: rRefetch } = useApiData(() => vendorRequestApi.getAll('PENDING', 1, 100));
@@ -76,23 +78,27 @@ export default function VendorsPage() {
     setIsDrawerOpen(true);
   };
 
-  const handleDelete = async (v: any) => {
-    if (window.confirm(`Are you sure you want to delete "${v.shopName}"? This action cannot be undone.`)) {
-      setDeletingId(v.id);
-      try {
-        if (!v.isRequest) {
-          await vendorApi.delete(v.id);
-        } else {
-          // If it's a request, just reject it or skip (backend might not support delete request yet)
-          alert('Cannot delete pending requests, please reject them instead.');
-        }
-        vRefetch();
-        rRefetch();
-      } catch (e: any) {
-        alert(e.message || 'Failed to delete vendor');
-      } finally {
-        setDeletingId(null);
+  const handleDelete = (v: any) => {
+    setConfirmModal({ isOpen: true, vendor: v });
+  };
+
+  const executeDelete = async () => {
+    const v = confirmModal.vendor;
+    if (!v) return;
+    setDeletingId(v.id);
+    try {
+      if (!v.isRequest) {
+        await vendorApi.delete(v.id);
+      } else {
+        toast.error('Cannot delete pending requests, please reject them instead.');
       }
+      vRefetch();
+      rRefetch();
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to delete vendor');
+    } finally {
+      setDeletingId(null);
+      setConfirmModal({ isOpen: false, vendor: null });
     }
   };
 
@@ -271,6 +277,15 @@ export default function VendorsPage() {
         onApprove={approve} 
         onReject={reject} 
         onSave={save}
+      />
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, vendor: null })}
+        onConfirm={executeDelete}
+        title="Delete Vendor"
+        message={`Are you sure you want to delete "${confirmModal.vendor?.shopName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        isDestructive={true}
       />
     </div>
   );

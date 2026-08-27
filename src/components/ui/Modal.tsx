@@ -20,8 +20,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       />
       
       {/* Modal Dialog */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between p-5 border-b border-slate-100">
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col transform transition-all animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 flex-shrink-0">
           <h3 className="text-lg font-bold text-slate-900">{title}</h3>
           <button 
             onClick={onClose}
@@ -30,7 +30,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <X size={20} />
           </button>
         </div>
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto">
           {children}
         </div>
       </div>

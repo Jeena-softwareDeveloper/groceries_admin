@@ -19,9 +19,9 @@ export function ImageUpload({ value, onChange, folder = 'districtmart', classNam
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (e.g., 5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('File size must be less than 5MB');
+    // Validate size (e.g., 50MB limit)
+    if (file.size > 50 * 1024 * 1024) {
+      setError('File size must be less than 50MB');
       return;
     }
 
@@ -29,28 +29,26 @@ export function ImageUpload({ value, onChange, folder = 'districtmart', classNam
       setIsUploading(true);
       setError(null);
 
-      // 1. Get signature from backend
-      const res = await api.get(`/upload/signature?folder=${folder}`);
-      const { signature, timestamp, cloudName, apiKey, folder: uploadFolder } = res.data.data;
-
-      // 2. Upload directly to Cloudinary
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', timestamp.toString());
-      formData.append('signature', signature);
-      formData.append('folder', uploadFolder);
+      formData.append('folder', folder);
 
-      const cloudinaryRes = await axios.post(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-        formData
-      );
+      // Upload directly to our backend server
+      const res = await api.post('/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      // 3. Update the state with the URL
-      onChange(cloudinaryRes.data.secure_url);
+      // Update the state with the returned URL
+      if (res.data.success) {
+        onChange(res.data.data.url);
+      } else {
+        throw new Error('Upload failed');
+      }
     } catch (err: any) {
       console.error('Upload failed:', err);
-      setError(err.response?.data?.message || err.response?.data?.error?.message || 'Failed to upload image. Check Cloudinary settings.');
+      setError(err.response?.data?.message || err.response?.data?.error?.message || 'Failed to upload image. Check server connection.');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -67,7 +65,11 @@ export function ImageUpload({ value, onChange, folder = 'districtmart', classNam
     <div className={`flex flex-col gap-2 ${className}`}>
       {value ? (
         <div className="relative inline-block border border-slate-200 rounded-lg overflow-hidden group max-w-[200px]">
-          <img src={value} alt="Uploaded" className="max-w-[200px] max-h-[150px] object-cover block" />
+          {value.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+            <video src={value} className="max-w-[200px] max-h-[150px] object-cover block" controls muted />
+          ) : (
+            <img src={value} alt="Uploaded" className="max-w-[200px] max-h-[150px] object-cover block" />
+          )}
           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <button
               type="button"
@@ -93,7 +95,7 @@ export function ImageUpload({ value, onChange, folder = 'districtmart', classNam
             <>
               <UploadCloud className="text-slate-400 mb-2" size={28} />
               <span className="text-sm font-medium text-slate-600">Click to upload image</span>
-              <span className="text-xs text-slate-400 mt-1">PNG, JPG up to 5MB</span>
+              <span className="text-xs text-slate-400 mt-1">Image or Video up to 50MB</span>
             </>
           )}
         </div>
@@ -103,7 +105,7 @@ export function ImageUpload({ value, onChange, folder = 'districtmart', classNam
         type="file" 
         ref={fileInputRef} 
         onChange={handleFileChange} 
-        accept="image/png, image/jpeg, image/webp" 
+        accept="image/png, image/jpeg, image/webp, video/mp4, video/quicktime"  
         className="hidden" 
       />
       
