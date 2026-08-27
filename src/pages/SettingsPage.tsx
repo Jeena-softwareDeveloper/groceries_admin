@@ -106,7 +106,7 @@ export default function SettingsPage() {
       if (res.data.platformFee !== undefined) handleChange('platformFee', String(res.data.platformFee));
       if (res.data.deliveryFee !== undefined) handleChange('deliveryFee', String(res.data.deliveryFee));
       if (res.data.featureFlags) {
-        const ff = res.data.featureFlags;
+        const ff = res.data.featureFlags as any;
         if (ff.vendorApprovalRequired !== undefined) handleChange('featVendorApprovalRequired', ff.vendorApprovalRequired);
         if (ff.multiVendor !== undefined) handleChange('featMultiVendor', ff.multiVendor);
         if (ff.wallet !== undefined) handleChange('featWallet', ff.wallet);

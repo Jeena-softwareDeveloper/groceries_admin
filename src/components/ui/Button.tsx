@@ -2,7 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 
 export interface ButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
   disabled?: boolean;
   loading?: boolean;
   onClick?: () => void;
@@ -24,6 +24,16 @@ const variantStyles: Record<NonNullable<ButtonProps['variant']>, CSSProperties> 
   ghost: {
     backgroundColor: 'transparent',
     color: '#16a34a',
+    border: 'none',
+  },
+  outline: {
+    backgroundColor: 'transparent',
+    color: '#475569',
+    border: '1px solid #cbd5e1',
+  },
+  danger: {
+    backgroundColor: '#ef4444',
+    color: '#ffffff',
     border: 'none',
   },
 };
