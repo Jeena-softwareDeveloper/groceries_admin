@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Store, Users, Check, X, Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
 import { vendorApi, vendorRequestApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer, ConfirmModal } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer, ConfirmModal, AddVendorDrawer } from '../components/ui';
 import { toast } from 'sonner';
 import type { Vendor } from '../types';
 
@@ -11,6 +11,7 @@ export default function VendorsPage() {
   const [search, setSearch] = useState('');
   const [selectedVendor, setSelectedVendor] = useState<any>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [drawerMode, setDrawerMode] = useState<'review' | 'view' | 'edit'>('review');
   const [confirmModal, setConfirmModal] = useState<{isOpen: boolean, vendor: any | null}>({isOpen: false, vendor: null});
@@ -52,6 +53,13 @@ export default function VendorsPage() {
 
   const save = async (id: string, data: any) => {
     await vendorApi.update(id, data);
+    vRefetch();
+  };
+
+  const handleCreateVendor = async (data: any) => {
+    const res = await vendorApi.create(data);
+    const tempPassword = (res as any).data?.tempPassword || (res as any).tempPassword;
+    toast.success(`Vendor created! Temp Password: ${tempPassword}`, { duration: 10000 });
     vRefetch();
   };
 
@@ -239,7 +247,10 @@ export default function VendorsPage() {
               <option value="PENDING">Pending ({statusCounts.pending})</option>
               <option value="APPROVED">Approved ({statusCounts.approved})</option>
             </select>
-            <button className="flex items-center h-9 gap-2 bg-slate-900 border border-transparent text-white px-4 rounded-lg text-[13px] font-semibold shadow-sm hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2">
+            <button 
+              onClick={() => setIsAddDrawerOpen(true)}
+              className="flex items-center h-9 gap-2 bg-slate-900 border border-transparent text-white px-4 rounded-lg text-[13px] font-semibold shadow-sm hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+            >
               <Plus size={15} strokeWidth={2.5} /> Add Vendor
             </button>
           </div>
@@ -277,6 +288,11 @@ export default function VendorsPage() {
         onApprove={approve} 
         onReject={reject} 
         onSave={save}
+      />
+      <AddVendorDrawer 
+        isOpen={isAddDrawerOpen}
+        onClose={() => setIsAddDrawerOpen(false)}
+        onSave={handleCreateVendor}
       />
       <ConfirmModal
         isOpen={confirmModal.isOpen}

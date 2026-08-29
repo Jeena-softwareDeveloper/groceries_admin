@@ -3,6 +3,7 @@ import { ENDPOINTS } from './endpoints';
 import type { ApiResponse, Vendor, RejectVendorDto } from '../types';
 
 export const vendorApi = {
+  create: (data: any) => api.post<ApiResponse<any>>(ENDPOINTS.ADMIN.VENDORS.BASE, data).then(res => res.data),
   getAll: (statusFilter?: string) => {
     const params = statusFilter ? `?status=${statusFilter}` : '';
     return api.get<ApiResponse<Vendor[]>>(`${ENDPOINTS.ADMIN.VENDORS.BASE}${params}`).then(res => res.data);

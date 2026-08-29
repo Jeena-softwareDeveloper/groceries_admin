@@ -12,6 +12,5 @@ export * from './Pagination';
 export * from './DataTable';
 export * from './Modal';
 export * from './ImageUpload';
+export * from './AddVendorDrawer';
 export type { ButtonProps } from './Button';
-
-
