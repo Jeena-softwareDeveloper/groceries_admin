@@ -18,6 +18,8 @@ export default function SettingsPage() {
     taxPercent: '5',
     platformFee: '5',
     deliveryFee: '0',
+    minAppVersion: '1.0.0',
+    playStoreUrl: 'https://play.google.com/store/apps/details?id=com.alltimemarket.app',
     
     // Platform
     platformName: 'All Time Market',
@@ -105,6 +107,8 @@ export default function SettingsPage() {
       if (res.data.taxPercent !== undefined) handleChange('taxPercent', String(res.data.taxPercent));
       if (res.data.platformFee !== undefined) handleChange('platformFee', String(res.data.platformFee));
       if (res.data.deliveryFee !== undefined) handleChange('deliveryFee', String(res.data.deliveryFee));
+      if (res.data.minAppVersion !== undefined) handleChange('minAppVersion', String(res.data.minAppVersion));
+      if (res.data.playStoreUrl !== undefined) handleChange('playStoreUrl', String(res.data.playStoreUrl));
       if (res.data.featureFlags) {
         const ff = res.data.featureFlags as any;
         if (ff.vendorApprovalRequired !== undefined) handleChange('featVendorApprovalRequired', ff.vendorApprovalRequired);
@@ -123,6 +127,8 @@ export default function SettingsPage() {
         taxPercent: Number(formData.taxPercent),
         platformFee: Number(formData.platformFee),
         deliveryFee: Number(formData.deliveryFee),
+        minAppVersion: formData.minAppVersion,
+        playStoreUrl: formData.playStoreUrl,
         featureFlags: {
           vendorApprovalRequired: formData.featVendorApprovalRequired,
           multiVendor: formData.featMultiVendor,
@@ -258,6 +264,16 @@ export default function SettingsPage() {
                 <Input label="Tax Percent (%)" keyName="taxPercent" desc="Tax percentage applied to all orders" />
                 <Input label="Platform Fee (₹)" keyName="platformFee" desc="Fixed fee charged per order" />
                 <Input label="Delivery Fee (₹)" keyName="deliveryFee" desc="Delivery fee (0 = FREE)" />
+              </div>
+
+              <div className="border-t border-slate-100 my-4"></div>
+
+              <h2 className="text-base font-bold text-slate-900 m-0 mb-1">App Update Configuration</h2>
+              <p className="text-sm text-slate-500 m-0 mb-6">Force update settings for the mobile app</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                <Input label="Minimum App Version" keyName="minAppVersion" desc="Example: 1.0.1 (Older versions will see force update)" />
+                <Input label="Play Store URL" keyName="playStoreUrl" desc="Link to the app on Google Play Store" />
               </div>
 
               <div className="border-t border-slate-100 my-4"></div>
