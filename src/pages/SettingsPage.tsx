@@ -272,7 +272,7 @@ export default function SettingsPage() {
               <p className="text-sm text-slate-500 m-0 mb-6">Force update settings for the mobile app</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                <Input label="Minimum App Version" keyName="minAppVersion" desc="Example: 1.0.1 (Older versions will see force update)" />
+                <Input label="Minimum App Version" keyName="minAppVersion" desc="Current Prod: 0.1.0 (Only update this AFTER the new version is LIVE on Play Store)" />
                 <Input label="Play Store URL" keyName="playStoreUrl" desc="Link to the app on Google Play Store" />
               </div>
 
