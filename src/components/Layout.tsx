@@ -2,10 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard, MapPin, Map, Grid, Store, Image, Layers, Truck, Tag, Ticket, BarChart3, Users, Bell, Settings, LogOut, Search, HelpCircle, Menu, ClipboardList, X, FileText
+  LayoutDashboard, MapPin, Map, Grid, Store, Image, Layers, Truck, Tag, Ticket, BarChart3, Users, Bell, Settings, LogOut, Search, HelpCircle, Menu, ClipboardList, X, FileText, QrCode
 } from 'lucide-react';
-
-
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -24,6 +22,7 @@ const navItems = [
   { path: '/customers', label: 'Customers', icon: Users },
   { path: '/notifications', label: 'Notifications', icon: Bell },
   { path: '/audit-logs', label: 'Audit Logs', icon: FileText },
+  { path: '/qr-generator', label: 'QR Generator', icon: QrCode },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 

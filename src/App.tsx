@@ -13,6 +13,7 @@ import { BannersPage, CustomersPage, NotificationsPage, OffersPage, CouponsPage,
 import ProductApprovalsPage from './pages/ProductApprovalsPage';
 import SettlementsPage from './pages/SettlementsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
+import QrGeneratorPage from './pages/QrGeneratorPage';
 
 import { AdminRoute, GuestRoute } from './guards';
 
@@ -50,6 +51,7 @@ export default function App() {
             <Route path="analytics" element={<AnalyticsPage />} />
             <Route path="customers" element={<CustomersPage />} />
             <Route path="notifications" element={<NotificationsPage />} />
+            <Route path="qr-generator" element={<QrGeneratorPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
         </Routes>
