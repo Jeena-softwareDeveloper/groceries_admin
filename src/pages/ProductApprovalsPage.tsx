@@ -367,6 +367,16 @@ export default function ProductApprovalsPage() {
         productItem={editProduct}
         onSuccess={handleEditSuccess}
       />
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, item: null })}
+        onConfirm={executeDelete}
+        title="Delete Product"
+        message={`Are you sure you want to delete ${confirmModal.item?.product?.name ?? 'this product'}? This action cannot be undone.`}
+        confirmText="Delete"
+        isDestructive={true}
+      />
     </div>
   );
 }
