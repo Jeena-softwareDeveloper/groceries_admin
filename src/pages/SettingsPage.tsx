@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Copy, Wallet, Banknote, Star, Store, Tag, Image as ImageIcon, Truck, Gift,
   UserPlus, ShoppingCart, Package, AlertTriangle, CreditCard, User, FileText, Bell, Mail,
@@ -18,6 +18,8 @@ export default function SettingsPage() {
     taxPercent: '5',
     platformFee: '5',
     deliveryFee: '0',
+    isDeliveryKmBased: false,
+    deliveryFeePerKm: '10',
     minAppVersion: '1.0.0',
     playStoreUrl: 'https://play.google.com/store/apps/details?id=com.alltimemarket.app',
     
@@ -107,6 +109,8 @@ export default function SettingsPage() {
       if (res.data.taxPercent !== undefined) handleChange('taxPercent', String(res.data.taxPercent));
       if (res.data.platformFee !== undefined) handleChange('platformFee', String(res.data.platformFee));
       if (res.data.deliveryFee !== undefined) handleChange('deliveryFee', String(res.data.deliveryFee));
+      if (res.data.isDeliveryKmBased !== undefined) handleChange('isDeliveryKmBased', res.data.isDeliveryKmBased as any);
+      if (res.data.deliveryFeePerKm !== undefined) handleChange('deliveryFeePerKm', String(res.data.deliveryFeePerKm));
       if (res.data.minAppVersion !== undefined) handleChange('minAppVersion', String(res.data.minAppVersion));
       if (res.data.playStoreUrl !== undefined) handleChange('playStoreUrl', String(res.data.playStoreUrl));
       if (res.data.featureFlags) {
@@ -127,6 +131,8 @@ export default function SettingsPage() {
         taxPercent: Number(formData.taxPercent),
         platformFee: Number(formData.platformFee),
         deliveryFee: Number(formData.deliveryFee),
+        isDeliveryKmBased: Boolean(formData.isDeliveryKmBased),
+        deliveryFeePerKm: Number(formData.deliveryFeePerKm),
         minAppVersion: formData.minAppVersion,
         playStoreUrl: formData.playStoreUrl,
         featureFlags: {
@@ -144,7 +150,11 @@ export default function SettingsPage() {
     }
   };
 
-  const Input = ({ label, desc, keyName, type = 'text', placeholder = '' }: { label: string, desc?: string, keyName: keyof typeof formData, type?: string, placeholder?: string }) => (
+const SettingsContext = React.createContext<any>(null);
+
+const Input = ({ label, desc, keyName, type = 'text', placeholder = '' }: { label: string, desc?: string, keyName: string, type?: string, placeholder?: string }) => {
+  const { formData, handleChange } = React.useContext(SettingsContext);
+  return (
     <label className="block mb-5">
       <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
       <input 
@@ -157,8 +167,11 @@ export default function SettingsPage() {
       {desc && <span className="text-xs text-slate-500 mt-1.5 block">{desc}</span>}
     </label>
   );
+};
 
-  const Select = ({ label, keyName, options }: { label: string, keyName: keyof typeof formData, options: string[] }) => (
+const Select = ({ label, keyName, options }: { label: string, keyName: string, options: string[] }) => {
+  const { formData, handleChange } = React.useContext(SettingsContext);
+  return (
     <label className="block mb-5">
       <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
       <select 
@@ -170,8 +183,11 @@ export default function SettingsPage() {
       </select>
     </label>
   );
+};
 
-  const Textarea = ({ label, desc, keyName, rows = 3 }: { label: string, desc?: string, keyName: keyof typeof formData, rows?: number }) => (
+const Textarea = ({ label, desc, keyName, rows = 3 }: { label: string, desc?: string, keyName: string, rows?: number }) => {
+  const { formData, handleChange } = React.useContext(SettingsContext);
+  return (
     <label className="block mb-5">
       <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
       <textarea 
@@ -183,8 +199,11 @@ export default function SettingsPage() {
       {desc && <span className="text-xs text-slate-500 mt-1.5 block">{desc}</span>}
     </label>
   );
+};
 
-  const ToggleItem = ({ icon: Icon, title, desc, keyName, color = 'slate' }: { icon?: React.ElementType, title: string, desc?: string, keyName: keyof typeof formData, color?: string }) => (
+const ToggleItem = ({ icon: Icon, title, desc, keyName, color = 'slate' }: { icon?: React.ElementType, title: string, desc?: string, keyName: string, color?: string }) => {
+  const { formData, toggle } = React.useContext(SettingsContext);
+  return (
     <div className="flex items-center justify-between py-4 border-b border-slate-100 last:border-0">
       <div className="flex items-start gap-4">
         {Icon && (
@@ -203,20 +222,22 @@ export default function SettingsPage() {
       </label>
     </div>
   );
+};
 
-  const FileUploadBox = ({ title, desc }: { title: string, desc: string }) => (
-    <div className="mb-6">
-      <span className="block mb-2 font-semibold text-slate-900 text-sm">{title}</span>
-      <div className="border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex flex-col items-center justify-center p-8 text-center hover:bg-slate-100 hover:border-slate-300 transition-colors cursor-pointer">
-        <UploadCloud size={24} className="text-slate-400 mb-2" />
-        <span className="text-sm font-semibold text-slate-700">Upload Image</span>
-        <span className="text-xs text-slate-500 mt-1">{desc}</span>
-      </div>
+const FileUploadBox = ({ title, desc }: { title: string, desc: string }) => (
+  <div className="mb-6">
+    <span className="block mb-2 font-semibold text-slate-900 text-sm">{title}</span>
+    <div className="border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex flex-col items-center justify-center p-8 text-center hover:bg-slate-100 hover:border-slate-300 transition-colors cursor-pointer">
+      <UploadCloud size={24} className="text-slate-400 mb-2" />
+      <span className="text-sm font-semibold text-slate-700">Upload Image</span>
+      <span className="text-xs text-slate-500 mt-1">{desc}</span>
     </div>
-  );
+  </div>
+);
 
   return (
-    <div className="text-slate-900 h-full flex flex-col">
+    <SettingsContext.Provider value={{ formData, handleChange, toggle }}>
+      <div className="text-slate-900 h-full flex flex-col">
       {/* Header & Tabs */}
       <div className="shrink-0">
         <PageHeader
@@ -263,7 +284,26 @@ export default function SettingsPage() {
                 <Input label="Minimum Order Value (₹)" keyName="minOrderValue" desc="Minimum order value required for checkout" />
                 <Input label="Tax Percent (%)" keyName="taxPercent" desc="Tax percentage applied to all orders" />
                 <Input label="Platform Fee (₹)" keyName="platformFee" desc="Fixed fee charged per order" />
-                <Input label="Delivery Fee (₹)" keyName="deliveryFee" desc="Delivery fee (0 = FREE)" />
+              </div>
+              
+              <div className="border border-slate-200 rounded-lg p-4 mb-5 shadow-sm bg-slate-50/50">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 m-0">Dynamic Delivery Fee</h4>
+                    <p className="text-xs text-slate-500 m-0 mt-1">Calculate delivery fee based on distance (per KM)</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={Boolean(formData.isDeliveryKmBased)} onChange={() => toggle('isDeliveryKmBased')} />
+                    <div className="w-10 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+                  </label>
+                </div>
+                <div className="pt-2 border-t border-slate-200">
+                  {formData.isDeliveryKmBased ? (
+                    <Input label="Per KM Fee (₹)" keyName="deliveryFeePerKm" desc="Delivery fee charged per kilometer" />
+                  ) : (
+                    <Input label="Fixed Delivery Fee (₹)" keyName="deliveryFee" desc="Flat delivery fee (0 = FREE)" />
+                  )}
+                </div>
               </div>
 
               <div className="border-t border-slate-100 my-4"></div>
@@ -561,7 +601,8 @@ export default function SettingsPage() {
         )}
 
       </div>
-    </div>
+      </div>
+    </SettingsContext.Provider>
   );
 }
 
