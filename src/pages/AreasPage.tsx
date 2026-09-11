@@ -76,6 +76,7 @@ export default function AreasPage() {
     {
       key: 'status',
       header: 'Status',
+      hideOnMobile: true,
       cell: (a) => (
         <StatusBadge 
           status={a.isActive ? 'Active' : 'Inactive'} 
@@ -89,6 +90,7 @@ export default function AreasPage() {
     {
       key: 'created',
       header: 'Created On',
+      hideOnMobile: true,
       cellClassName: 'font-medium text-slate-500',
       cell: () => '12 Jul 2025' // Hardcoded as per original
     },

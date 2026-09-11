@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminExtrasApi } from '../api';
 import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, ChevronLeft, ChevronRight, Ban, Send, Check } from 'lucide-react';
-import { Modal, ImageUpload, PageHeader, ConfirmModal } from '../components/ui';
+import { Modal, ImageUpload, PageHeader, ConfirmModal, DataTable, ColumnDef, StatusBadge } from '../components/ui';
 import { toast } from 'sonner';
 
 // Generic Pagination component to avoid repetition
@@ -104,29 +104,96 @@ export function BannersPage() {
 
   const rows = [1, 2, 3];
 
+  const bannerColumns: ColumnDef<any>[] = [
+    {
+      key: 'id',
+      header: '#',
+      cell: (_, i) => String(i + 1).padStart(2, '0')
+    },
+    {
+      key: 'preview',
+      header: 'Preview',
+      cell: (b) => (
+        <div className="flex items-center gap-2">
+          <img src={b.imageUrl || 'https://placehold.co/100x40'} alt={b.title} className="rounded border border-slate-200 w-16 h-8 sm:w-20 sm:h-10 object-cover shrink-0" />
+          {b.type === 'VIDEO' && (
+            <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded font-bold">VIDEO</span>
+          )}
+        </div>
+      )
+    },
+    {
+      key: 'title',
+      header: 'Title',
+      cell: (b) => <span className="font-semibold text-slate-800 text-xs sm:text-sm">{b.title}</span>
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      hideOnMobile: true,
+      cell: (b) => <span className="text-xs font-semibold text-slate-500">{b.type || 'IMAGE'}</span>
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      hideOnMobile: true,
+      cell: (b) => (
+        <StatusBadge 
+          status={b.isActive !== false ? 'Active' : 'Inactive'}
+          colorMap={{
+            Active: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+            Inactive: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' }
+          }}
+        />
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      cell: (b) => (
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => handleEdit(b)} 
+            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            title="Edit Banner"
+          >
+            <Edit size={14} strokeWidth={2.5} />
+          </button>
+          <button 
+            onClick={() => remove(b.id)} 
+            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-red-400 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors"
+            title="Delete Banner"
+          >
+            <Trash2 size={14} strokeWidth={2.5} />
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="text-slate-900">
       <PageHeader
         title="Banners"
         description=""
         action={
-          <button className="flex items-center gap-2 bg-green-600 border border-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={() => { resetForm(); setShowForm(true); }}>
-            <Plus size={16} /> Add Banner
+          <button className="flex items-center gap-1.5 sm:gap-2 bg-green-600 border border-green-600 text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold cursor-pointer transition-colors hover:bg-green-700" onClick={() => { resetForm(); setShowForm(true); }}>
+            <Plus size={16} /> <span>Add Banner</span>
           </button>
         }
       />
 
       {/* 3-Row Info Cards */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {rows.map(r => {
           const info = rowLabels[r];
           const count = banners.filter(b => (b.row ?? 1) === r).length;
           return (
-            <div key={r} className={`border rounded-lg p-4 ${info.color}`}>
-              <div className="font-bold text-sm mb-1">{info.label}</div>
-              <div className="text-xs opacity-80 mb-2">{info.desc}</div>
-              <div className="font-bold text-2xl">{count}</div>
-              <div className="text-xs opacity-70">banners</div>
+            <div key={r} className={`border rounded-lg p-3 sm:p-4 ${info.color}`}>
+              <div className="font-bold text-xs sm:text-sm mb-1">{info.label}</div>
+              <div className="text-[11px] sm:text-xs opacity-80 mb-2">{info.desc}</div>
+              <div className="font-bold text-xl sm:text-2xl">{count}</div>
+              <div className="text-[10px] sm:text-xs opacity-70">banners</div>
             </div>
           );
         })}
@@ -177,7 +244,7 @@ export function BannersPage() {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Header Gradient Colors</label>
               <div className="w-full h-10 rounded-lg mb-3 border border-slate-200" style={{ background: `linear-gradient(135deg, ${themeColor}, ${themeColorEnd})` }} />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Start Color</label>
                   <div className="flex items-center gap-2">
@@ -209,61 +276,18 @@ export function BannersPage() {
         return (
           <div key={r} className="mb-6">
             <div className="flex items-center gap-3 mb-3">
-              <h3 className={`text-sm font-bold px-3 py-1.5 rounded-full border ${info.color}`}>{info.label}</h3>
-              <span className="text-xs text-slate-400">{info.desc}</span>
+              <h3 className={`text-xs sm:text-sm font-bold px-3 py-1.5 rounded-full border ${info.color}`}>{info.label}</h3>
+              <span className="text-xs text-slate-400 hidden sm:inline">{info.desc}</span>
             </div>
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-              {rowBanners.length === 0 ? (
-                <div className="p-8 text-center text-slate-400 text-sm">
+            <DataTable
+              data={rowBanners}
+              columns={bannerColumns}
+              emptyState={
+                <div className="p-6 text-center text-slate-400 text-sm">
                   No banners for this row. Click "Add Banner" to create one.
                 </div>
-              ) : (
-                <div className="overflow-x-auto w-full">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-200">
-                        <th className="p-4 text-left text-xs font-bold text-slate-900">#</th>
-                        <th className="p-4 text-left text-xs font-bold text-slate-900">Preview</th>
-                        <th className="p-4 text-left text-xs font-bold text-slate-900">Title</th>
-                        <th className="p-4 text-left text-xs font-bold text-slate-900">Type</th>
-                        <th className="p-4 text-left text-xs font-bold text-slate-900">Status</th>
-                        <th className="p-4 text-left text-xs font-bold text-slate-900">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rowBanners.map((b, i) => (
-                        <tr key={b.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                          <td className="p-4 text-sm font-medium text-slate-900">{i + 1}</td>
-                          <td className="p-4">
-                            {b.type === 'VIDEO' ? (
-                              <div className="flex items-center gap-2">
-                                <img src={b.imageUrl || 'https://placehold.co/100x40'} alt="Thumb" className="rounded border border-slate-200 w-[80px] h-[40px] object-cover" />
-                                <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full font-semibold">VIDEO</span>
-                              </div>
-                            ) : (
-                              <img src={b.imageUrl || 'https://placehold.co/100x40'} alt="Banner" className="rounded border border-slate-200 max-w-[100px] max-h-[40px] object-cover" />
-                            )}
-                          </td>
-                          <td className="p-4 text-sm font-medium text-slate-900">{b.title}</td>
-                          <td className="p-4 text-xs font-medium text-slate-500">{b.type || 'IMAGE'}</td>
-                          <td className="p-4 text-sm align-middle">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${b.isActive !== false ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
-                              {b.isActive !== false ? 'Active' : 'Inactive'}
-                            </span>
-                          </td>
-                          <td className="p-4 text-sm align-middle">
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => handleEdit(b)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-500 cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-colors"><Edit size={14} /></button>
-                              <button onClick={() => remove(b.id)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-red-600 cursor-pointer hover:bg-red-50 hover:border-red-200 transition-colors"><Trash2 size={14} /></button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+              }
+            />
           </div>
         );
       })}
@@ -281,7 +305,6 @@ export function BannersPage() {
   );
 }
 
-
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Array<{ id: string; phone: string; name?: string; isBlocked: boolean }>>([]);
   const load = () => adminExtrasApi.customers.getAll().then((r) => setCustomers(r.data));
@@ -292,55 +315,75 @@ export function CustomersPage() {
     load();
   };
 
+  const customerColumns: ColumnDef<any>[] = [
+    {
+      key: 'id',
+      header: '#',
+      cell: (_, i) => String(i + 1).padStart(2, '0')
+    },
+    {
+      key: 'name',
+      header: 'Name',
+      cell: (c) => <span className="font-bold text-slate-900 text-xs sm:text-sm">{c.name ?? 'Guest'}</span>
+    },
+    {
+      key: 'phone',
+      header: 'Phone',
+      cell: (c) => <span className="font-medium text-slate-600 text-xs sm:text-sm">{c.phone}</span>
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      hideOnMobile: true,
+      cell: (c) => (
+        <StatusBadge 
+          status={c.isBlocked ? 'Blocked' : 'Active'} 
+          colorMap={{
+            Active: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+            Blocked: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' }
+          }} 
+        />
+      )
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      cell: (c) => (
+        <div className="flex items-center gap-2">
+          <button 
+            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors"
+            title="View Customer"
+          >
+            <Eye size={14} strokeWidth={2.5} />
+          </button>
+          <button 
+            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg cursor-pointer transition-colors hover:bg-slate-100" 
+            title={c.isBlocked ? 'Unblock' : 'Block'} 
+            onClick={() => toggleBlock(c.id, !c.isBlocked)}
+          >
+            <Ban size={14} className={c.isBlocked ? "text-emerald-600" : "text-red-500"} strokeWidth={2.5} />
+          </button>
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="text-slate-900">
-            <PageHeader 
+      <PageHeader 
         title="Customers"
         description=""
-        action={
-          <div className="flex items-center gap-3">
-            
+      />
+      <DataTable
+        data={customers}
+        columns={customerColumns}
+        pagination={<Pagination count={customers.length} />}
+        emptyState={
+          <div className="p-8 text-center text-slate-400 text-sm font-medium">
+            No customers found.
           </div>
         }
       />
-      <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
-        <div className="overflow-x-auto w-full">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap">#</th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap"><div className="inline-flex items-center gap-1.5">Name <ChevronsUpDown size={14} className="text-slate-400" /></div></th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap"><div className="inline-flex items-center gap-1.5">Phone <ChevronsUpDown size={14} className="text-slate-400" /></div></th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap"><div className="inline-flex items-center gap-1.5">Status <ChevronsUpDown size={14} className="text-slate-400" /></div></th>
-                <th className="p-4 text-left text-xs font-bold text-slate-900 capitalize whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {customers.map((c, i) => (
-                <tr key={c.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
-                  <td className="p-4 text-sm font-medium text-slate-900">{i + 1}</td>
-                  <td className="p-4 text-sm font-bold text-slate-900">{c.name ?? 'Guest'}</td>
-                  <td className="p-4 text-sm font-medium text-slate-900">{c.phone}</td>
-                  <td className="p-4 text-sm align-middle">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${c.isBlocked ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-600 border-green-200'}`}>
-                      {c.isBlocked ? 'Blocked' : 'Active'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-sm align-middle">
-                    <div className="flex items-center gap-2">
-                      <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-500 cursor-pointer hover:bg-slate-50 hover:text-slate-900 transition-colors"><Eye size={14} /></button>
-                      <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md cursor-pointer transition-colors hover:bg-slate-50" title={c.isBlocked ? 'Unblock' : 'Block'} onClick={() => toggleBlock(c.id, !c.isBlocked)}>
-                        <Ban size={14} className={c.isBlocked ? "text-green-600" : "text-red-600"} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Pagination count={customers.length} />
-      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../api';
 import { toast } from 'sonner';
+import { ImageUpload } from './ImageUpload';
 
 interface EditProductDrawerProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface EditProductDrawerProps {
 
 export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: EditProductDrawerProps) {
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     sellingPrice: '',
@@ -21,6 +23,9 @@ export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: E
 
   useEffect(() => {
     if (isOpen && productItem?.product) {
+      const firstImg = productItem.product.images?.[0];
+      const url = typeof firstImg === 'string' ? firstImg : firstImg?.url || '';
+      setImageUrl(url);
       setFormData({
         name: productItem.product.name || '',
         sellingPrice: productItem.product.sellingPrice || '',
@@ -37,12 +42,16 @@ export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: E
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = {
+      const payload: any = {
         name: formData.name,
         sellingPrice: Number(formData.sellingPrice),
         mrp: Number(formData.mrp),
         stock: Number(formData.stock),
       };
+      if (imageUrl) {
+        payload.images = [{ url: imageUrl, isPrimary: true }];
+      }
+
       const res = await api.put(`/admin/product-approvals/products/${productItem.productId}`, payload);
       const updatedProduct = res.data.data;
       
@@ -51,6 +60,7 @@ export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: E
         product: {
           ...productItem.product,
           ...updatedProduct,
+          images: imageUrl ? [{ url: imageUrl }] : (productItem.product.images || []),
           inventory: { stock: updatedProduct.inventory?.stock ?? payload.stock },
         }
       });
@@ -72,7 +82,7 @@ export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: E
 
       {/* Drawer */}
       <div 
-        className={`fixed inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-out flex flex-col`}
+        className={`fixed inset-y-0 right-0 w-full sm:w-[500px] max-w-full bg-white shadow-2xl z-[110] transform transition-transform duration-300 ease-out flex flex-col`}
       >
         <div className="flex-1 overflow-y-auto">
           {/* Header */}
@@ -92,17 +102,13 @@ export function EditProductDrawer({ isOpen, onClose, productItem, onSuccess }: E
           <div className="p-6 pb-2">
             <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
               <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-              Product Images
+              Product Image
             </h3>
-            <div className="flex gap-4 overflow-x-auto pb-2">
-              {productItem.product?.images && productItem.product.images.length > 0 ? (
-                productItem.product.images.map((img: any, idx: number) => (
-                  <img key={idx} src={img.url} alt={`Product ${idx}`} className="w-24 h-24 object-cover rounded-xl border border-slate-200 shadow-sm shrink-0" />
-                ))
-              ) : (
-                <div className="w-24 h-24 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 text-xs font-medium">No Images</div>
-              )}
-            </div>
+            <ImageUpload
+              value={imageUrl}
+              onChange={(url) => setImageUrl(url)}
+              folder="districtmart-products"
+            />
           </div>
 
           {/* Form */}

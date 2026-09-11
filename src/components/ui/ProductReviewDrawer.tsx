@@ -57,18 +57,18 @@ export function ProductReviewDrawer({ isOpen, onClose, approval, onApprove, onRe
     <>
       <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
       
-      <div className="fixed inset-y-0 right-0 w-[500px] bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[500px] max-w-full bg-white shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-slate-100">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Review Product</h2>
-            <p className="text-sm text-slate-500">Vendor: {product.vendor?.shopName || 'Unknown'}</p>
+            <h2 className="text-base sm:text-lg font-bold text-slate-900">Review Product</h2>
+            <p className="text-xs sm:text-sm text-slate-500">Vendor: {product.vendor?.shopName || 'Unknown'}</p>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-full transition-colors">
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-8">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
           <section>
             <SectionTitle icon={ImageIcon} title="Product Images" />
             <div className="flex gap-4 overflow-x-auto pb-2">

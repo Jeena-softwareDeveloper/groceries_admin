@@ -13,4 +13,5 @@ export * from './DataTable';
 export * from './Modal';
 export * from './ImageUpload';
 export * from './AddVendorDrawer';
+export * from './SelectDropdown';
 export type { ButtonProps } from './Button';

@@ -26,8 +26,8 @@ export function Pagination({
   // For now we just implement the UI
 
   return (
-    <div className="flex items-center justify-between p-4 px-6 border-t border-slate-100 bg-slate-50/50">
-      <span className="text-sm font-medium text-slate-500">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-2.5 sm:p-4 px-3 sm:px-6 border-t border-slate-100 bg-slate-50/50">
+      <span className="text-xs sm:text-sm font-medium text-slate-500">
         Showing <span className="font-bold text-slate-700">{total === 0 ? 0 : start}–{end}</span> of <span className="font-bold text-slate-700">{total}</span> {entityName}
       </span>
       <div className="flex items-center gap-2">

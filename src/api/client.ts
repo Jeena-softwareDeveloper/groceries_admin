@@ -29,7 +29,17 @@ function onRefreshed(token: string) {
 }
 
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    // Fix legacy localhost image URLs in response data
+    if (res.data && typeof res.data === 'object' && API_BASE_URL) {
+      const str = JSON.stringify(res.data);
+      if (str.includes('http://localhost:4000')) {
+        const fixedStr = str.replace(/http:\/\/localhost:4000/g, API_BASE_URL);
+        res.data = JSON.parse(fixedStr);
+      }
+    }
+    return res;
+  },
   async (error) => {
     const originalRequest = error.config;
     if (

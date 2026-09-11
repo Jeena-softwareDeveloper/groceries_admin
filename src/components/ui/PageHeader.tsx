@@ -15,10 +15,10 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
   }, []);
 
   const portalContent = (
-    <>
-      <h1 className="text-lg font-bold tracking-tight m-0 text-slate-800">{title}</h1>
+    <div className="flex items-center justify-between w-full gap-2 min-w-0">
+      <h1 className="text-sm sm:text-lg font-bold tracking-tight m-0 text-slate-800 truncate max-w-[130px] sm:max-w-none">{title}</h1>
       {action && <div className="shrink-0">{action}</div>}
-    </>
+    </div>
   );
 
   return (

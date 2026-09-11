@@ -78,7 +78,7 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
         className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[100] transition-opacity" 
         onClick={onClose}
       />
-      <div className="fixed inset-y-0 right-0 w-[500px] bg-white shadow-2xl z-[101] flex flex-col border-l border-slate-100 transform transition-transform duration-300">
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[500px] max-w-full bg-white shadow-2xl z-[101] flex flex-col border-l border-slate-100 transform transition-transform duration-300">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white/50 backdrop-blur-xl">

@@ -14,14 +14,8 @@ const navItems = [
   { path: '/product-approvals', label: 'Product Approvals', icon: ClipboardList },
   { path: '/settlements', label: 'Settlements', icon: Tag },
   { path: '/banners', label: 'Banners', icon: Image },
-  { path: '/micro-banners', label: 'Micro Banners', icon: Layers },
-  { path: '/delivery-charges', label: 'Delivery', icon: Truck },
-  { path: '/offers', label: 'Offers', icon: Tag },
   { path: '/coupons', label: 'Coupons', icon: Ticket },
-  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/customers', label: 'Customers', icon: Users },
-  { path: '/notifications', label: 'Notifications', icon: Bell },
-  { path: '/audit-logs', label: 'Audit Logs', icon: FileText },
   { path: '/qr-generator', label: 'QR Generator', icon: QrCode },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
@@ -156,9 +150,9 @@ export default function Layout() {
       {/* Main Area */}
       <main className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Top Header */}
-        <header className="h-[60px] bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 gap-3">
+        <header className="h-[60px] bg-white border-b border-slate-200 flex items-center justify-between px-2 sm:px-4 md:px-6 shrink-0 gap-2 sm:gap-3">
           
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <div className="flex items-center gap-2 shrink-0">
               {/* Mobile menu button */}
               <button type="button" onClick={() => setIsMobileSidebarOpen(true)} className="bg-transparent border-none text-slate-600 cursor-pointer p-1 lg:hidden hover:bg-slate-100 rounded-md transition-colors">
@@ -179,7 +173,7 @@ export default function Layout() {
             </div>
           </div>
 
-          <div id="top-header-portal" className="flex-1 flex items-center justify-between px-4 empty:hidden"></div>
+          <div id="top-header-portal" className="flex-1 flex items-center justify-between px-1 sm:px-4 min-w-0 empty:hidden"></div>
 
           <div className="flex items-center gap-2 shrink-0">
             <button className="bg-transparent border-none text-slate-600 cursor-pointer relative p-1.5 hover:text-slate-900 hover:bg-slate-100 rounded-md">
@@ -203,7 +197,7 @@ export default function Layout() {
         </header>
 
         {/* Page Content - responsive padding */}
-        <div className="flex-1 overflow-auto no-scrollbar p-3 sm:p-4 md:p-5 lg:p-6">
+        <div className="flex-1 overflow-auto no-scrollbar p-2 sm:p-4 md:p-5 lg:p-6">
           <Outlet />
         </div>
       </main>

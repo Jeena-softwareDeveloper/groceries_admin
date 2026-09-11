@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
-import { PageHeader, DataTable, ColumnDef, Modal, ProductReviewDrawer, EditProductDrawer, ConfirmModal } from '../components/ui';
+import { PageHeader, DataTable, ColumnDef, Modal, ProductReviewDrawer, EditProductDrawer, ConfirmModal, SelectDropdown, StatusBadge } from '../components/ui';
 import { toast } from 'sonner';
 import { ArrowLeft, Search, Loader2, Trash2 } from 'lucide-react';
 
@@ -148,11 +148,13 @@ export default function ProductApprovalsPage() {
     {
       key: 'code',
       header: 'CODE',
+      hideOnMobile: true,
       cell: (v) => <span className="text-xs text-slate-500 font-mono font-medium">{v.code || 'NO-CODE'}</span>
     },
     {
       key: 'contact',
       header: 'CONTACT',
+      hideOnMobile: true,
       cell: (v) => (
         <div>
           <div className="font-semibold text-slate-700">{v.phone}</div>
@@ -163,6 +165,7 @@ export default function ProductApprovalsPage() {
     {
       key: 'status',
       header: 'STATUS',
+      hideOnMobile: true,
       cell: (v) => (
         <span className="bg-emerald-50 text-emerald-600 py-1 px-2.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-emerald-100">
           {v.vendorStatus}
@@ -193,7 +196,7 @@ export default function ProductApprovalsPage() {
       cell: (v) => (
         <button 
           onClick={() => setSelectedVendorId(v.id)}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200 font-semibold text-sm"
+          className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-semibold text-xs whitespace-nowrap"
         >
           View Products
         </button>
@@ -220,6 +223,7 @@ export default function ProductApprovalsPage() {
     {
       key: 'category',
       header: 'Category',
+      hideOnMobile: true,
       cell: (item) => <span className="text-slate-600 font-medium">{item.product.category?.name || 'Uncategorized'}</span>
     },
     {
@@ -237,10 +241,16 @@ export default function ProductApprovalsPage() {
     {
       key: 'status',
       header: 'Status',
+      hideOnMobile: true,
       cell: (item) => (
-        <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider">
-          {item.status.replace('_', ' ')}
-        </span>
+        <StatusBadge 
+          status={item.status.replace('_', ' ')} 
+          colorMap={{
+            APPROVED: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+            PENDING: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
+            REJECTED: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' }
+          }}
+        />
       )
     },
     {
@@ -305,16 +315,16 @@ export default function ProductApprovalsPage() {
         description={selectedVendorId ? "Review products submitted by this vendor" : "Review products submitted by vendors"} 
         action={
           !selectedVendorId && (
-            <select
+            <SelectDropdown
+              options={[
+                { value: 'PENDING', label: 'Pending Review', color: 'bg-amber-500' },
+                { value: 'APPROVED', label: 'Approved', color: 'bg-emerald-500' },
+                { value: 'REJECTED', label: 'Rejected', color: 'bg-red-500' },
+                { value: 'CHANGES_REQUESTED', label: 'Changes Requested', color: 'bg-blue-500' },
+              ]}
               value={activeTab}
-              onChange={(e) => setActiveTab(e.target.value)}
-              className="border border-slate-200 rounded-lg px-4 py-2.5 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-medium"
-            >
-              <option value="PENDING">Pending Review</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-              <option value="CHANGES_REQUESTED">Changes Requested</option>
-            </select>
+              onChange={(val) => setActiveTab(val)}
+            />
           )
         }
       />

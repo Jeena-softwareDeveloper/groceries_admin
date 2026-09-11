@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Check, FileText, Image as ImageIcon, MapPin, Building, CreditCard, AlertCircle, Save, Loader2 } from 'lucide-react';
+import { ImageUpload } from './ImageUpload';
 
 export type DrawerMode = 'review' | 'view' | 'edit';
 
@@ -37,7 +38,13 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
         accountHolderName: vendor.accountHolderName || vendor.bankHolderName || '',
         accountNumber: vendor.accountNumber || vendor.bankAccountNo || '',
         ifscCode: vendor.ifscCode || vendor.bankIfsc || '',
-        upiId: vendor.upiId || '' // Note: not on Vendor table
+        upiId: vendor.upiId || '', // Note: not on Vendor table
+        logoUrl: vendor.logoUrl || '',
+        bannerUrl: vendor.bannerUrl || '',
+        ownerPhotoUrl: vendor.ownerPhotoUrl || '',
+        govtIdUrl: vendor.govtIdUrl || '',
+        gstCertUrl: vendor.gstCertUrl || vendor.gstDocUrl || '',
+        fssaiCertUrl: vendor.fssaiCertUrl || vendor.fssaiDocUrl || '',
       });
       setRejectMode(false);
       setRejectReason('');
@@ -107,29 +114,34 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
     </div>
   );
 
-  const DocImage = ({ label, url }: { label: string; url?: string | null }) => (
-    <div className="flex flex-col mb-4">
-      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</span>
-      {url ? (
-        <a href={url} target="_blank" rel="noreferrer" className="block relative w-full h-32 bg-slate-100 rounded-lg border border-slate-200 overflow-hidden group">
-          <img src={url} alt={label} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <span className="text-white text-xs font-semibold">View Full</span>
+  const DocImage = ({ label, url, field }: { label: string; url?: string | null; field?: string }) => {
+    const currentUrl = mode === 'edit' && field ? formData[field] : url;
+
+    return (
+      <div className="flex flex-col mb-4">
+        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</span>
+        {mode === 'edit' && field ? (
+          <ImageUpload 
+            value={formData[field] || ''} 
+            onChange={(newUrl) => handleInputChange(field, newUrl)} 
+            folder="districtmart-vendors" 
+          />
+        ) : currentUrl ? (
+          <a href={currentUrl} target="_blank" rel="noreferrer" className="block relative w-full h-32 bg-slate-100 rounded-lg border border-slate-200 overflow-hidden group">
+            <img src={currentUrl} alt={label} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-xs font-semibold">View Full</span>
+            </div>
+          </a>
+        ) : (
+          <div className="w-full h-24 bg-slate-50 border border-slate-200 border-dashed rounded-lg flex flex-col items-center justify-center text-slate-400">
+            <ImageIcon size={20} className="mb-1 opacity-50" />
+            <span className="text-[11px]">Not provided</span>
           </div>
-        </a>
-      ) : (
-        <div className="w-full h-24 bg-slate-50 border border-slate-200 border-dashed rounded-lg flex flex-col items-center justify-center text-slate-400">
-          <ImageIcon size={20} className="mb-1 opacity-50" />
-          <span className="text-[11px]">Not provided</span>
-        </div>
-      )}
-      {mode === 'edit' && (
-        <div className="mt-2">
-          <span className="text-[10px] text-slate-400 italic">Image upload in edit mode requires image widget.</span>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  };
   
   const getHeaderTitle = () => {
     if (mode === 'edit') return 'Edit Vendor';
@@ -144,7 +156,7 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
         onClick={onClose}
       />
       
-      <div className={`fixed inset-y-0 right-0 w-[450px] bg-white shadow-2xl z-[110] flex flex-col transform transition-transform duration-300 ease-out translate-x-0`}>
+      <div className={`fixed inset-y-0 right-0 w-full sm:w-[450px] max-w-full bg-white shadow-2xl z-[110] flex flex-col transform transition-transform duration-300 ease-out translate-x-0`}>
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0 bg-white">
@@ -215,12 +227,12 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
             </div>
             
             <div className="grid grid-cols-2 gap-4 mt-2">
-              <DocImage label="Shop Logo" url={vendor.logoUrl} />
-              <DocImage label="Shop Banner" url={vendor.bannerUrl} />
-              <DocImage label="Owner Photo" url={vendor.ownerPhotoUrl} />
-              <DocImage label="Govt ID / Aadhar" url={vendor.govtIdUrl} />
-              <DocImage label="GST Certificate" url={vendor.gstCertUrl || vendor.gstDocUrl} />
-              <DocImage label="FSSAI Certificate" url={vendor.fssaiCertUrl || vendor.fssaiDocUrl} />
+              <DocImage label="Shop Logo" url={vendor.logoUrl} field="logoUrl" />
+              <DocImage label="Shop Banner" url={vendor.bannerUrl} field="bannerUrl" />
+              <DocImage label="Owner Photo" url={vendor.ownerPhotoUrl} field="ownerPhotoUrl" />
+              <DocImage label="Govt ID / Aadhar" url={vendor.govtIdUrl} field="govtIdUrl" />
+              <DocImage label="GST Certificate" url={vendor.gstCertUrl || vendor.gstDocUrl} field="gstCertUrl" />
+              <DocImage label="FSSAI Certificate" url={vendor.fssaiCertUrl || vendor.fssaiDocUrl} field="fssaiCertUrl" />
             </div>
           </div>
 

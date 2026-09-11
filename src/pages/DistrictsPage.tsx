@@ -58,6 +58,7 @@ export default function DistrictsPage() {
     {
       key: 'code',
       header: 'Code',
+      hideOnMobile: true,
       cell: (d) => (
         <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-lg text-[11px] font-medium uppercase font-mono tracking-wider">
           {d.code}
@@ -76,18 +77,20 @@ export default function DistrictsPage() {
     {
       key: 'vendors',
       header: 'Total Vendors',
+      hideOnMobile: true,
       cellClassName: 'font-medium text-slate-500',
-      cell: (d) => d.code === 'BLR' ? 98 : d.code === 'CHN' ? 58 : Math.floor(Math.random() * 100) // Original mock logic
+      cell: (d) => d.code === 'BLR' ? 98 : d.code === 'CHN' ? 58 : Math.floor(Math.random() * 100)
     },
     {
       key: 'customers',
       header: 'Total Customers',
       cellClassName: 'font-medium text-slate-500',
-      cell: (d) => d.code === 'BLR' ? '12,458' : d.code === 'CHN' ? '12,110' : '4,230' // Original mock logic
+      cell: (d) => d.code === 'BLR' ? '12,458' : d.code === 'CHN' ? '12,110' : '4,230'
     },
     {
       key: 'status',
       header: 'Status',
+      hideOnMobile: true,
       cell: (d) => (
         <StatusBadge 
           status={d.isActive ? 'Active' : 'Inactive'} 
@@ -101,8 +104,9 @@ export default function DistrictsPage() {
     {
       key: 'created',
       header: 'Created On',
+      hideOnMobile: true,
       cellClassName: 'font-medium text-slate-500',
-      cell: (d) => d.code === 'BLR' ? '10 Jul 2025' : '11 Jul 2025' // Original mock logic
+      cell: (d) => d.code === 'BLR' ? '10 Jul 2025' : '11 Jul 2025'
     },
     {
       key: 'actions',

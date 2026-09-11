@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Store, Users, Check, X, Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
 import { vendorApi, vendorRequestApi } from '../api';
 import { useApiData } from '../hooks';
-import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer, ConfirmModal, AddVendorDrawer } from '../components/ui';
+import { PageHeader, SearchBar, DataTable, Pagination, StatusBadge, EmptyState, ColumnDef, VendorReviewDrawer, ConfirmModal, AddVendorDrawer, SelectDropdown } from '../components/ui';
 import { toast } from 'sonner';
 import type { Vendor } from '../types';
 
@@ -147,6 +147,7 @@ export default function VendorsPage() {
     {
       key: 'code',
       header: 'CODE',
+      hideOnMobile: true,
       cell: (v) => <span className="text-xs text-slate-500 font-mono font-medium">{v.code || 'NO-CODE'}</span>
     },
     {
@@ -162,6 +163,7 @@ export default function VendorsPage() {
     {
       key: 'email',
       header: 'Email',
+      hideOnMobile: true,
       cellClassName: 'text-slate-500 font-medium',
       cell: (v) => v.email
     },
@@ -174,6 +176,7 @@ export default function VendorsPage() {
     {
       key: 'status',
       header: 'Status',
+      hideOnMobile: true,
       cell: (v) => (
         <StatusBadge 
           status={v.status} 
@@ -238,15 +241,15 @@ export default function VendorsPage() {
         description="Manage and monitor all registered vendors on the platform." 
         action={
           <div className="flex items-center gap-3">
-            <select
+            <SelectDropdown
+              options={[
+                { value: '', label: `All Vendors (${statusCounts.all})` },
+                { value: 'PENDING', label: `Pending (${statusCounts.pending})`, color: 'bg-amber-500' },
+                { value: 'APPROVED', label: `Approved (${statusCounts.approved})`, color: 'bg-emerald-500' },
+              ]}
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              className="bg-white border border-slate-200 text-slate-700 text-[13px] font-medium py-2 px-3 rounded-lg outline-none cursor-pointer hover:border-slate-300 focus:border-slate-300 focus:ring-2 focus:ring-slate-100 min-w-[160px] h-9"
-            >
-              <option value="">All Vendors ({statusCounts.all})</option>
-              <option value="PENDING">Pending ({statusCounts.pending})</option>
-              <option value="APPROVED">Approved ({statusCounts.approved})</option>
-            </select>
+              onChange={(val) => setFilter(val)}
+            />
             <button 
               onClick={() => setIsAddDrawerOpen(true)}
               className="flex items-center h-9 gap-2 bg-slate-900 border border-transparent text-white px-4 rounded-lg text-[13px] font-semibold shadow-sm hover:bg-slate-800 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
