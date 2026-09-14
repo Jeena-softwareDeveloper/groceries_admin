@@ -14,6 +14,75 @@ interface VendorReviewDrawerProps {
   onSave?: (id: string, data: any) => Promise<void>;
 }
 
+// ─── Extracted outside to avoid re-mount on every keystroke (fixes focus-loss) ─
+
+interface DataRowProps {
+  label: string;
+  value?: string | number | null;
+  field?: string;
+  mode: DrawerMode;
+  formData: any;
+  onInputChange: (field: string, value: string) => void;
+}
+
+function DataRow({ label, value, field, mode, formData, onInputChange }: DataRowProps) {
+  return (
+    <div className="flex flex-col mb-3">
+      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">{label}</span>
+      {mode === 'edit' && field ? (
+        <input
+          type="text"
+          value={formData[field] ?? ''}
+          onChange={e => onInputChange(field, e.target.value)}
+          className="w-full bg-white border border-slate-200 rounded text-sm px-2 py-1.5 outline-none focus:border-emerald-500"
+        />
+      ) : (
+        <span className="text-[14px] font-medium text-slate-800">{value || '-'}</span>
+      )}
+    </div>
+  );
+}
+
+interface DocImageProps {
+  label: string;
+  url?: string | null;
+  field?: string;
+  mode: DrawerMode;
+  formData: any;
+  onInputChange: (field: string, value: string) => void;
+}
+
+function DocImage({ label, url, field, mode, formData, onInputChange }: DocImageProps) {
+  const currentUrl = mode === 'edit' && field ? formData[field] : url;
+
+  return (
+    <div className="flex flex-col mb-4">
+      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</span>
+      {mode === 'edit' && field ? (
+        <ImageUpload
+          value={formData[field] || ''}
+          onChange={(newUrl) => onInputChange(field, newUrl)}
+          folder="districtmart-vendors"
+        />
+      ) : currentUrl ? (
+        <a href={currentUrl} target="_blank" rel="noreferrer" className="block relative w-full h-32 bg-slate-100 rounded-lg border border-slate-200 overflow-hidden group">
+          <img src={currentUrl} alt={label} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <span className="text-white text-xs font-semibold">View Full</span>
+          </div>
+        </a>
+      ) : (
+        <div className="w-full h-24 bg-slate-50 border border-slate-200 border-dashed rounded-lg flex flex-col items-center justify-center text-slate-400">
+          <ImageIcon size={20} className="mb-1 opacity-50" />
+          <span className="text-[11px]">Not provided</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────────
+
 export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, onReject, onSave }: VendorReviewDrawerProps) {
   const [rejectMode, setRejectMode] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -26,7 +95,7 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
       setFormData({
         shopName: vendor.shopName || '',
         shopCategory: vendor.shopCategory || '',
-        ownerName: vendor.ownerName || '', // Note: not on Vendor table
+        ownerName: vendor.ownerName || '',
         mobileNumber: vendor.mobileNumber || vendor.phone || '',
         email: vendor.email || '',
         description: vendor.description || '',
@@ -34,11 +103,11 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
         deliveryRadius: vendor.deliveryRadius || '',
         gstNumber: vendor.gstNumber || '',
         fssaiNumber: vendor.fssaiNumber || '',
-        bankName: vendor.bankName || '', // Note: not on Vendor table
+        bankName: vendor.bankName || '',
         accountHolderName: vendor.accountHolderName || vendor.bankHolderName || '',
         accountNumber: vendor.accountNumber || vendor.bankAccountNo || '',
         ifscCode: vendor.ifscCode || vendor.bankIfsc || '',
-        upiId: vendor.upiId || '', // Note: not on Vendor table
+        upiId: vendor.upiId || '',
         logoUrl: vendor.logoUrl || '',
         bannerUrl: vendor.bannerUrl || '',
         ownerPhotoUrl: vendor.ownerPhotoUrl || '',
@@ -98,51 +167,6 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  const DataRow = ({ label, value, field }: { label: string; value?: string | number | null, field?: string }) => (
-    <div className="flex flex-col mb-3">
-      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">{label}</span>
-      {mode === 'edit' && field ? (
-        <input 
-          type="text" 
-          value={formData[field]} 
-          onChange={e => handleInputChange(field, e.target.value)}
-          className="w-full bg-white border border-slate-200 rounded text-sm px-2 py-1.5 outline-none focus:border-emerald-500"
-        />
-      ) : (
-        <span className="text-[14px] font-medium text-slate-800">{value || '-'}</span>
-      )}
-    </div>
-  );
-
-  const DocImage = ({ label, url, field }: { label: string; url?: string | null; field?: string }) => {
-    const currentUrl = mode === 'edit' && field ? formData[field] : url;
-
-    return (
-      <div className="flex flex-col mb-4">
-        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-2">{label}</span>
-        {mode === 'edit' && field ? (
-          <ImageUpload 
-            value={formData[field] || ''} 
-            onChange={(newUrl) => handleInputChange(field, newUrl)} 
-            folder="districtmart-vendors" 
-          />
-        ) : currentUrl ? (
-          <a href={currentUrl} target="_blank" rel="noreferrer" className="block relative w-full h-32 bg-slate-100 rounded-lg border border-slate-200 overflow-hidden group">
-            <img src={currentUrl} alt={label} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-white text-xs font-semibold">View Full</span>
-            </div>
-          </a>
-        ) : (
-          <div className="w-full h-24 bg-slate-50 border border-slate-200 border-dashed rounded-lg flex flex-col items-center justify-center text-slate-400">
-            <ImageIcon size={20} className="mb-1 opacity-50" />
-            <span className="text-[11px]">Not provided</span>
-          </div>
-        )}
-      </div>
-    );
-  };
-  
   const getHeaderTitle = () => {
     if (mode === 'edit') return 'Edit Vendor';
     if (mode === 'view') return 'Vendor Details';
@@ -156,7 +180,7 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
         onClick={onClose}
       />
       
-      <div className={`fixed inset-y-0 right-0 w-full sm:w-[450px] max-w-full bg-white shadow-2xl z-[110] flex flex-col transform transition-transform duration-300 ease-out translate-x-0`}>
+      <div className="fixed inset-y-0 right-0 w-full sm:w-[450px] max-w-full bg-white shadow-2xl z-[110] flex flex-col transform transition-transform duration-300 ease-out translate-x-0">
         
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 shrink-0 bg-white">
@@ -177,17 +201,18 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-6" style={{ scrollbarWidth: 'thin' }}>
           
+          {/* Shop Details */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               <Building size={16} className="text-emerald-600" />
               <h4 className="m-0 text-sm font-bold text-slate-800">Shop Details</h4>
             </div>
             <div className="grid grid-cols-2 gap-x-4">
-              <DataRow label="Shop Name" value={vendor.shopName} field="shopName" />
-              <DataRow label="Category" value={vendor.shopCategory || '-'} field="shopCategory" />
-              <DataRow label="Owner Name" value={vendor.ownerName || '-'} field="ownerName" />
-              <DataRow label="Mobile Number" value={vendor.mobileNumber || vendor.phone} field="mobileNumber" />
-              <DataRow label="Email Address" value={vendor.email || '-'} field="email" />
+              <DataRow label="Shop Name" value={vendor.shopName} field="shopName" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Category" value={vendor.shopCategory || '-'} field="shopCategory" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Owner Name" value={vendor.ownerName || '-'} field="ownerName" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Mobile Number" value={vendor.mobileNumber || vendor.phone} field="mobileNumber" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Email Address" value={vendor.email || '-'} field="email" mode={mode} formData={formData} onInputChange={handleInputChange} />
             </div>
             {mode === 'edit' ? (
               <div className="flex flex-col mb-3">
@@ -199,54 +224,56 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
                 />
               </div>
             ) : (
-              <DataRow label="Description" value={vendor.description} />
+              <DataRow label="Description" value={vendor.description} mode={mode} formData={formData} onInputChange={handleInputChange} />
             )}
           </div>
 
+          {/* Location */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               <MapPin size={16} className="text-emerald-600" />
               <h4 className="m-0 text-sm font-bold text-slate-800">Location</h4>
             </div>
-            <DataRow label="Address" value={vendor.address} field="address" />
+            <DataRow label="Address" value={vendor.address} field="address" mode={mode} formData={formData} onInputChange={handleInputChange} />
             <div className="grid grid-cols-2 gap-x-4">
-              <DataRow label="Area" value={vendor.area?.name} />
-              <DataRow label="District" value={vendor.area?.district?.name || vendor.district?.name} />
-              <DataRow label="Delivery Radius" value={vendor.deliveryRadius ? `${vendor.deliveryRadius} km` : undefined} field="deliveryRadius" />
+              <DataRow label="Area" value={vendor.area?.name} mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="District" value={vendor.area?.district?.name || vendor.district?.name} mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Delivery Radius" value={vendor.deliveryRadius ? `${vendor.deliveryRadius} km` : undefined} field="deliveryRadius" mode={mode} formData={formData} onInputChange={handleInputChange} />
             </div>
           </div>
 
+          {/* Legal & Documents */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               <FileText size={16} className="text-emerald-600" />
               <h4 className="m-0 text-sm font-bold text-slate-800">Legal & Documents</h4>
             </div>
             <div className="grid grid-cols-2 gap-x-4">
-              <DataRow label="GST Number" value={vendor.gstNumber} field="gstNumber" />
-              <DataRow label="FSSAI Number" value={vendor.fssaiNumber} field="fssaiNumber" />
+              <DataRow label="GST Number" value={vendor.gstNumber} field="gstNumber" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="FSSAI Number" value={vendor.fssaiNumber} field="fssaiNumber" mode={mode} formData={formData} onInputChange={handleInputChange} />
             </div>
-            
             <div className="grid grid-cols-2 gap-4 mt-2">
-              <DocImage label="Shop Logo" url={vendor.logoUrl} field="logoUrl" />
-              <DocImage label="Shop Banner" url={vendor.bannerUrl} field="bannerUrl" />
-              <DocImage label="Owner Photo" url={vendor.ownerPhotoUrl} field="ownerPhotoUrl" />
-              <DocImage label="Govt ID / Aadhar" url={vendor.govtIdUrl} field="govtIdUrl" />
-              <DocImage label="GST Certificate" url={vendor.gstCertUrl || vendor.gstDocUrl} field="gstCertUrl" />
-              <DocImage label="FSSAI Certificate" url={vendor.fssaiCertUrl || vendor.fssaiDocUrl} field="fssaiCertUrl" />
+              <DocImage label="Shop Logo" url={vendor.logoUrl} field="logoUrl" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DocImage label="Shop Banner" url={vendor.bannerUrl} field="bannerUrl" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DocImage label="Owner Photo" url={vendor.ownerPhotoUrl} field="ownerPhotoUrl" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DocImage label="Govt ID / Aadhar" url={vendor.govtIdUrl} field="govtIdUrl" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DocImage label="GST Certificate" url={vendor.gstCertUrl || vendor.gstDocUrl} field="gstCertUrl" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DocImage label="FSSAI Certificate" url={vendor.fssaiCertUrl || vendor.fssaiDocUrl} field="fssaiCertUrl" mode={mode} formData={formData} onInputChange={handleInputChange} />
             </div>
           </div>
 
+          {/* Banking */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-2">
               <CreditCard size={16} className="text-emerald-600" />
               <h4 className="m-0 text-sm font-bold text-slate-800">Banking</h4>
             </div>
             <div className="grid grid-cols-2 gap-x-4">
-              <DataRow label="Bank Name" value={vendor.bankName || '-'} field="bankName" />
-              <DataRow label="Account Holder" value={vendor.accountHolderName || vendor.bankHolderName || '-'} field="accountHolderName" />
-              <DataRow label="Account Number" value={vendor.accountNumber || vendor.bankAccountNo || '-'} field="accountNumber" />
-              <DataRow label="IFSC Code" value={vendor.ifscCode || vendor.bankIfsc || '-'} field="ifscCode" />
-              <DataRow label="UPI ID" value={vendor.upiId || '-'} field="upiId" />
+              <DataRow label="Bank Name" value={vendor.bankName || '-'} field="bankName" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Account Holder" value={vendor.accountHolderName || vendor.bankHolderName || '-'} field="accountHolderName" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Account Number" value={vendor.accountNumber || vendor.bankAccountNo || '-'} field="accountNumber" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="IFSC Code" value={vendor.ifscCode || vendor.bankIfsc || '-'} field="ifscCode" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="UPI ID" value={vendor.upiId || '-'} field="upiId" mode={mode} formData={formData} onInputChange={handleInputChange} />
             </div>
           </div>
 
@@ -337,14 +364,14 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
           )}
           
           {mode === 'view' && (
-             <div className="flex items-center gap-3">
-               <button 
-                 onClick={onClose}
-                 className="w-full h-11 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
-               >
-                 Close
-               </button>
-             </div>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={onClose}
+                className="w-full h-11 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm flex items-center justify-center hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
           )}
 
         </div>
