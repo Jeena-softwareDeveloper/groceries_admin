@@ -1,25 +1,9 @@
 import { useEffect, useState } from 'react';
 import { adminExtrasApi } from '../api';
-import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, ChevronLeft, ChevronRight, Ban, Send, Check } from 'lucide-react';
-import { Modal, ImageUpload, PageHeader, ConfirmModal, DataTable, ColumnDef, StatusBadge } from '../components/ui';
+import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, Ban, Send, Check } from 'lucide-react';
+import { Modal, ImageUpload, PageHeader, ConfirmModal, DataTable, ColumnDef, StatusBadge, Pagination, SearchBar } from '../components/ui';
 import { toast } from 'sonner';
 
-// Generic Pagination component to avoid repetition
-const Pagination = ({ count }: { count: number }) => (
-  <div className="flex items-center justify-between p-4 px-6 border-t border-slate-200 bg-white">
-    <span className="text-sm text-slate-500">Showing 1 to {count} of {count} results</span>
-    <div className="flex items-center gap-2">
-      <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-500 cursor-pointer hover:bg-slate-50 transition-colors"><ChevronLeft size={16} /></button>
-      <button className="w-8 h-8 flex items-center justify-center bg-green-600 border border-green-600 rounded-md text-white font-medium cursor-pointer">1</button>
-      <button className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-md text-slate-500 cursor-pointer hover:bg-slate-50 transition-colors"><ChevronRight size={16} /></button>
-      <select className="ml-4 px-3 py-1.5 border border-slate-200 rounded-md bg-white text-sm text-slate-600 outline-none cursor-pointer">
-        <option>10 / page</option>
-        <option>20 / page</option>
-        <option>50 / page</option>
-      </select>
-    </div>
-  </div>
-);
 
 export function BannersPage() {
   const [banners, setBanners] = useState<Array<any>>([]);
@@ -306,87 +290,336 @@ export function BannersPage() {
 }
 
 export function CustomersPage() {
-  const [customers, setCustomers] = useState<Array<{ id: string; phone: string; name?: string; isBlocked: boolean }>>([]);
-  const load = () => adminExtrasApi.customers.getAll().then((r) => setCustomers(r.data));
-  useEffect(() => { load(); }, []);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'blocked'>('all');
+  const [blockingId, setBlockingId] = useState<string | null>(null);
+
+  // View modal state
+  const [viewCustomer, setViewCustomer] = useState<any | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const res = await adminExtrasApi.customers.getAll(page, limit, debouncedSearch);
+      setCustomers(res.data ?? []);
+      setTotal(res.meta?.total ?? 0);
+    } catch {
+      toast.error('Failed to load customers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { load(); }, [page, limit, debouncedSearch]);
+
+  const handleView = async (id: string) => {
+    setIsViewOpen(true);
+    setViewCustomer(null);
+    setViewLoading(true);
+    try {
+      const res = await adminExtrasApi.customers.getById(id);
+      setViewCustomer(res.data);
+    } catch {
+      toast.error('Failed to load customer details');
+    } finally {
+      setViewLoading(false);
+    }
+  };
 
   const toggleBlock = async (id: string, block: boolean) => {
-    await adminExtrasApi.customers.block(id, block);
-    load();
+    setBlockingId(id);
+    try {
+      await adminExtrasApi.customers.block(id, block);
+      toast.success(block ? 'Customer blocked' : 'Customer unblocked');
+      load();
+    } catch {
+      toast.error('Action failed');
+    } finally {
+      setBlockingId(null);
+    }
   };
+
+  // Client-side status filter (on top of server paginated data)
+  const displayed = customers.filter(c => {
+    if (statusFilter === 'active') return !c.isBlocked;
+    if (statusFilter === 'blocked') return c.isBlocked;
+    return true;
+  });
 
   const customerColumns: ColumnDef<any>[] = [
     {
       key: 'id',
       header: '#',
-      cell: (_, i) => String(i + 1).padStart(2, '0')
+      headerClassName: 'pl-6',
+      cellClassName: 'pl-6 font-semibold text-slate-400',
+      cell: (_, i) => String((page - 1) * limit + i + 1).padStart(2, '0')
     },
     {
       key: 'name',
       header: 'Name',
-      cell: (c) => <span className="font-bold text-slate-900 text-xs sm:text-sm">{c.name ?? 'Guest'}</span>
+      cell: (c) => (
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+            {(c.name ?? c.phone ?? '?').charAt(0).toUpperCase()}
+          </div>
+          <span className="font-semibold text-slate-800 text-sm">{c.name ?? <span className="text-slate-400 font-normal italic">Guest</span>}</span>
+        </div>
+      )
     },
     {
       key: 'phone',
       header: 'Phone',
-      cell: (c) => <span className="font-medium text-slate-600 text-xs sm:text-sm">{c.phone}</span>
+      cell: (c) => <span className="font-medium text-slate-600 text-sm">{c.phone}</span>
+    },
+    {
+      key: 'location',
+      header: 'Location',
+      hideOnMobile: true,
+      cell: (c) => (
+        <span className="text-slate-500 text-xs">
+          {c.currentLocation ? c.currentLocation.slice(0, 40) + (c.currentLocation.length > 40 ? '…' : '') : <span className="text-slate-300">—</span>}
+        </span>
+      )
+    },
+    {
+      key: 'joined',
+      header: 'Joined',
+      hideOnMobile: true,
+      cell: (c) => <span className="text-slate-400 text-xs">{new Date(c.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
     },
     {
       key: 'status',
       header: 'Status',
       hideOnMobile: true,
       cell: (c) => (
-        <StatusBadge 
-          status={c.isBlocked ? 'Blocked' : 'Active'} 
+        <StatusBadge
+          status={c.isBlocked ? 'Blocked' : 'Active'}
           colorMap={{
             Active: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
             Blocked: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' }
-          }} 
+          }}
         />
       )
     },
     {
       key: 'actions',
       header: 'Actions',
+      headerClassName: 'pr-6',
+      cellClassName: 'pr-6',
       cell: (c) => (
         <div className="flex items-center gap-2">
-          <button 
-            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors"
+          <button
+            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors"
             title="View Customer"
+            onClick={() => handleView(c.id)}
           >
             <Eye size={14} strokeWidth={2.5} />
           </button>
-          <button 
-            className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg cursor-pointer transition-colors hover:bg-slate-100" 
-            title={c.isBlocked ? 'Unblock' : 'Block'} 
+          <button
+            className={`w-8 h-8 flex items-center justify-center bg-white border rounded-lg cursor-pointer transition-colors disabled:opacity-40 ${
+              c.isBlocked
+                ? 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                : 'border-red-200 text-red-500 hover:bg-red-50'
+            }`}
+            title={c.isBlocked ? 'Unblock Customer' : 'Block Customer'}
             onClick={() => toggleBlock(c.id, !c.isBlocked)}
+            disabled={blockingId === c.id}
           >
-            <Ban size={14} className={c.isBlocked ? "text-emerald-600" : "text-red-500"} strokeWidth={2.5} />
+            {blockingId === c.id
+              ? <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              : <Ban size={14} strokeWidth={2.5} />
+            }
           </button>
         </div>
       )
     }
   ];
 
+  const blockedCount = customers.filter(c => c.isBlocked).length;
+  const activeCount = customers.filter(c => !c.isBlocked).length;
+
   return (
-    <div className="text-slate-900">
-      <PageHeader 
+    <div className="flex flex-col gap-6 w-full max-w-[1600px] mx-auto pb-12 text-slate-900">
+      <PageHeader
         title="Customers"
-        description=""
-      />
-      <DataTable
-        data={customers}
-        columns={customerColumns}
-        pagination={<Pagination count={customers.length} />}
-        emptyState={
-          <div className="p-8 text-center text-slate-400 text-sm font-medium">
-            No customers found.
+        description="Manage all registered customers on the platform."
+        action={
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Status filter tabs */}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+              {([
+                { key: 'all', label: `All (${total})` },
+                { key: 'active', label: `Active (${activeCount})` },
+                { key: 'blocked', label: `Blocked (${blockedCount})` },
+              ] as const).map(tab => (
+                <button
+                  key={tab.key}
+                  onClick={() => setStatusFilter(tab.key)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
+                    statusFilter === tab.key
+                      ? 'bg-white text-slate-900 shadow-sm'
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <SearchBar
+              value={search}
+              onChange={setSearch}
+              placeholder="Search by phone or name..."
+            />
           </div>
         }
       />
+
+      <DataTable
+        data={displayed}
+        columns={customerColumns}
+        loading={loading}
+        emptyState={
+          <div className="p-12 text-center">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <Eye size={20} className="text-slate-400" />
+            </div>
+            <p className="text-sm font-semibold text-slate-700">No customers found</p>
+            <p className="text-xs text-slate-400 mt-1">{search ? 'Try a different search term.' : 'No customers match this filter.'}</p>
+          </div>
+        }
+        pagination={
+          total > 0 && (
+            <Pagination
+              total={total}
+              page={page}
+              limit={limit}
+              entityName="customers"
+              onPageChange={setPage}
+              onLimitChange={(l) => { setLimit(l); setPage(1); }}
+            />
+          )
+        }
+      />
+
+      {/* Customer Detail Modal */}
+      <Modal
+        isOpen={isViewOpen}
+        onClose={() => { setIsViewOpen(false); setViewCustomer(null); }}
+        title="Customer Details"
+      >
+        {viewLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <span className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : viewCustomer ? (
+          <div className="flex flex-col gap-5">
+            {/* Avatar + Basic Info */}
+            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white text-xl font-bold shrink-0">
+                {(viewCustomer.name ?? viewCustomer.phone ?? '?').charAt(0).toUpperCase()}
+              </div>
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <p className="text-base font-bold text-slate-900 truncate">{viewCustomer.name ?? <span className="text-slate-400 font-normal italic">Guest</span>}</p>
+                <p className="text-sm text-slate-500 font-medium">{viewCustomer.phone}</p>
+                {viewCustomer.email && <p className="text-xs text-slate-400">{viewCustomer.email}</p>}
+                <span className={`mt-1 inline-flex self-start items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border ${
+                  viewCustomer.isBlocked
+                    ? 'bg-red-50 text-red-600 border-red-200'
+                    : 'bg-emerald-50 text-emerald-600 border-emerald-200'
+                }`}>
+                  {viewCustomer.isBlocked ? 'Blocked' : 'Active'}
+                </span>
+              </div>
+            </div>
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Customer ID', value: viewCustomer.id.slice(0, 16) + '…' },
+                { label: 'Joined', value: new Date(viewCustomer.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' }) },
+                { label: 'Last Updated', value: new Date(viewCustomer.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) },
+                { label: 'Addresses', value: viewCustomer.addresses?.length ?? 0 },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex flex-col gap-0.5 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                  <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">{label}</span>
+                  <span className="text-sm font-bold text-slate-800">{value}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Location */}
+            {viewCustomer.currentLocation && (
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-1">Last Location</span>
+                <span className="text-xs text-slate-700 font-medium leading-relaxed">{viewCustomer.currentLocation}</span>
+              </div>
+            )}
+
+            {/* Recent Orders */}
+            {viewCustomer.orders?.length > 0 && (
+              <div>
+                <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Recent Orders ({viewCustomer.orders.length})</p>
+                <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
+                  {viewCustomer.orders.map((order: any) => (
+                    <div key={order.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100 gap-3">
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <span className="text-xs font-mono font-semibold text-slate-600 truncate">{order.id.slice(0, 18)}…</span>
+                        <span className="text-[10px] text-slate-400">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                      </div>
+                      <div className="flex flex-col items-end gap-0.5 shrink-0">
+                        <span className="text-sm font-bold text-slate-900">₹{Number(order.total ?? 0).toLocaleString('en-IN')}</span>
+                        <span className={`text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-full border ${
+                          order.status === 'DELIVERED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                          order.status === 'CANCELLED' ? 'bg-red-50 text-red-500 border-red-200' :
+                          'bg-amber-50 text-amber-600 border-amber-200'
+                        }`}>{order.status}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Block / Unblock Action */}
+            <button
+              onClick={() => {
+                toggleBlock(viewCustomer.id, !viewCustomer.isBlocked);
+                setIsViewOpen(false);
+              }}
+              className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${
+                viewCustomer.isBlocked
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  : 'bg-red-500 hover:bg-red-600 text-white'
+              }`}
+            >
+              {viewCustomer.isBlocked ? '✓ Unblock Customer' : '⊘ Block Customer'}
+            </button>
+          </div>
+        ) : (
+          <p className="text-center text-slate-400 py-8 text-sm">Could not load customer details.</p>
+        )}
+      </Modal>
     </div>
   );
 }
+
 
 export function MicroBannersPage() {
   const [items, setItems] = useState<Array<{ id: string; title: string; isActive: boolean }>>([]);
@@ -499,7 +732,7 @@ export function MicroBannersPage() {
             </tbody>
           </table>
         </div>
-        <Pagination count={items.length} />
+        <Pagination total={items.length} page={1} limit={items.length || 1} entityName="micro banners" />
       </div>
 
       <ConfirmModal
@@ -706,7 +939,7 @@ export function DeliveryChargesPage() {
             </tbody>
           </table>
         </div>
-        <Pagination count={rules.length} />
+        <Pagination total={rules.length} page={1} limit={rules.length || 1} entityName="rules" />
       </div>
 
       <ConfirmModal
@@ -832,7 +1065,7 @@ export function OffersPage() {
             </tbody>
           </table>
         </div>
-        <Pagination count={offers.length} />
+        <Pagination total={offers.length} page={1} limit={offers.length || 1} entityName="offers" />
       </div>
 
       <ConfirmModal
@@ -958,7 +1191,7 @@ export function CouponsPage() {
             </tbody>
           </table>
         </div>
-        <Pagination count={coupons.length} />
+        <Pagination total={coupons.length} page={1} limit={coupons.length || 1} entityName="coupons" />
       </div>
 
       <ConfirmModal

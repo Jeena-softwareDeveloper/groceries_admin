@@ -34,8 +34,14 @@ export const adminExtrasApi = {
     delete: (id: string) => api.delete<ApiResponse<any>>(`${ENDPOINTS.ADMIN.COUPONS}/${id}`).then(res => res.data),
   },
   customers: {
-    getAll: () => api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.CUSTOMERS.BASE).then(res => res.data),
-    block: (id: string, isBlock: boolean) => api.post<ApiResponse<any>>(isBlock ? ENDPOINTS.ADMIN.CUSTOMERS.BLOCK(id) : ENDPOINTS.ADMIN.CUSTOMERS.UNBLOCK(id)).then(res => res.data),
+    getAll: (page = 1, limit = 20, search = '') =>
+      api.get<ApiResponse<any>>(ENDPOINTS.ADMIN.CUSTOMERS.BASE, {
+        params: { page, limit, ...(search ? { search } : {}) },
+      }).then(res => res.data),
+    getById: (id: string) =>
+      api.get<ApiResponse<any>>(`${ENDPOINTS.ADMIN.CUSTOMERS.BASE}/${id}`).then(res => res.data),
+    block: (id: string, isBlock: boolean) =>
+      api.post<ApiResponse<any>>(isBlock ? ENDPOINTS.ADMIN.CUSTOMERS.BLOCK(id) : ENDPOINTS.ADMIN.CUSTOMERS.UNBLOCK(id)).then(res => res.data),
   },
   notifications: {
     broadcast: (data: any) => api.post<ApiResponse<{ sent: number }>>(ENDPOINTS.ADMIN.NOTIFICATIONS.BROADCAST, data).then(res => res.data),
