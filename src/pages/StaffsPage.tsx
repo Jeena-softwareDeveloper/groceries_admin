@@ -9,7 +9,8 @@ import {
   ColumnDef, 
   ConfirmModal, 
   AddStaffDrawer, 
-  StaffQrModal 
+  StaffQrModal,
+  PageHeader
 } from '../components/ui';
 import { 
   Users, 
@@ -17,7 +18,7 @@ import {
   Store, 
   QrCode, 
   Plus, 
-  Edit2, 
+  Edit2,
   Trash2, 
   Power, 
   Copy, 
@@ -317,138 +318,53 @@ export default function StaffsPage() {
   return (
     <div className="flex flex-col gap-0 w-full text-slate-900 pb-12">
       
-      {/* ── ULTRA PREMIUM HERO HEADER ── */}
-      <div
-        className="relative overflow-hidden rounded-2xl mb-6"
-        style={{
-          background: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #047857 70%, #059669 100%)',
-        }}
-      >
-        {/* Decorative blobs */}
-        <div
-          className="absolute -top-12 -right-12 w-56 h-56 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #a7f3d0, transparent 70%)' }}
-        />
-        <div
-          className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10"
-          style={{ background: 'radial-gradient(circle, #6ee7b7, transparent 70%)' }}
-        />
-        {/* Corner grid pattern */}
-        <div
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.5) 24px, rgba(255,255,255,0.5) 25px), repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.5) 24px, rgba(255,255,255,0.5) 25px)',
-          }}
-        />
-
-        <div className="relative px-6 py-6 flex items-center justify-between gap-4">
-          {/* Left — Brand + Title */}
-          <div className="flex items-center gap-4">
-            {/* ATM Logo box */}
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg border border-white/20"
-              style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)' }}
-            >
-              <img
-                src="/logo.png"
-                alt="ATM"
-                className="w-10 h-10 object-contain"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<span style="font-size:22px">🛒</span>';
-                }}
+      <PageHeader 
+        title="Field Executives" 
+        description="Manage staff, referral codes & QR campaigns" 
+        action={
+          <div className="flex items-center gap-3">
+            <div className="flex p-1 rounded-xl border border-slate-200 bg-slate-50">
+              {[
+                { id: 'all', label: 'All', count: totalStaff },
+                { id: 'active', label: 'Active', count: activeStaff, dot: 'bg-emerald-500' },
+                { id: 'inactive', label: 'Inactive', count: totalStaff - activeStaff, dot: 'bg-slate-400' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setFilter(tab.id as any)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    filter === tab.id 
+                      ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80' 
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
+                  {tab.label}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${
+                    filter === tab.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <div className="w-64">
+              <SearchBar 
+                value={search} 
+                onChange={setSearch} 
+                placeholder="Search staff..." 
               />
             </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <p className="text-emerald-200 text-xs font-semibold tracking-widest uppercase">All Time Market</p>
-                <span className="px-1.5 py-0.5 rounded-md bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-[10px] font-bold tracking-wider">ADMIN</span>
-              </div>
-              <h1 className="text-2xl font-black text-white leading-tight tracking-tight">Field Executives</h1>
-              <p className="text-emerald-200/80 text-xs mt-0.5">Manage staff, referral codes &amp; QR campaigns</p>
-            </div>
-          </div>
-
-          {/* Right — CTA */}
-          <button
-            onClick={handleOpenAdd}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-emerald-900 text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-lg shrink-0 cursor-pointer"
-            style={{ background: 'linear-gradient(135deg, #a7f3d0, #6ee7b7)' }}
-          >
-            <Plus size={16} />
-            <span>Add Staff</span>
-          </button>
-        </div>
-
-        {/* ── Glassmorphism Stat Strip ── */}
-        <div
-          className="mx-4 mb-4 rounded-xl grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/10 overflow-hidden border border-white/10"
-          style={{ background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(12px)' }}
-        >
-          {[
-            { icon: Users, label: 'Total Staff', value: totalStaff, color: 'text-blue-300' },
-            { icon: UserCheck, label: 'Active Staff', value: activeStaff, color: 'text-emerald-300' },
-            { icon: Store, label: 'Vendors Onboarded', value: totalReferrals, color: 'text-amber-300' },
-            { 
-              icon: Award, 
-              label: 'Top Referrer', 
-              value: topPerformer ? topPerformer.name.split(' ')[0] : '—', 
-              sub: topPerformer ? `${topPerformer.vendorsCount || 0} vendors` : '',
-              color: 'text-purple-300' 
-            },
-          ].map((stat, i) => (
-            <div key={i} className="flex items-center gap-3 px-5 py-3.5">
-              <stat.icon className={`${stat.color} shrink-0`} size={20} />
-              <div className="min-w-0">
-                <div className={`text-xl font-black ${stat.color} leading-none truncate`}>{stat.value}</div>
-                <div className="text-[11px] text-white/50 font-medium leading-tight mt-0.5 truncate">{stat.label}</div>
-                {(stat as any).sub && <div className="text-[10px] text-white/30 leading-none">{(stat as any).sub}</div>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── FILTER + SEARCH BAR ── */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
-        {/* Status Tabs */}
-        <div
-          className="flex p-1 rounded-xl border border-slate-200 bg-slate-50 w-full sm:w-auto"
-        >
-          {[
-            { id: 'all', label: 'All', count: totalStaff },
-            { id: 'active', label: 'Active', count: activeStaff, dot: 'bg-emerald-500' },
-            { id: 'inactive', label: 'Inactive', count: totalStaff - activeStaff, dot: 'bg-slate-400' },
-          ].map(tab => (
             <button
-              key={tab.id}
-              onClick={() => setFilter(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                filter === tab.id 
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80' 
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
+              onClick={handleOpenAdd}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-white bg-emerald-600 hover:bg-emerald-700 text-sm font-bold transition-all shadow-sm shrink-0 cursor-pointer"
             >
-              {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
-              {tab.label}
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${
-                filter === tab.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
-              }`}>
-                {tab.count}
-              </span>
+              <Plus size={16} />
+              <span>Add Staff</span>
             </button>
-          ))}
-        </div>
-
-        {/* Search */}
-        <div className="w-full sm:w-80">
-          <SearchBar 
-            value={search} 
-            onChange={setSearch} 
-            placeholder="Search name, code, phone, role…" 
-          />
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       {/* ── PREMIUM STAFF TABLE ── */}
       <div className="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm bg-white">

@@ -37,8 +37,8 @@ export function StaffInfoModal({ isOpen, onClose, staff, onOpenQr, onOpenEdit }:
 
   if (!isOpen || !staff) return null;
 
-  const vendorLink = `https://alltimemarket.com/become-vendor?ref=${staff.code}`;
-  const appInstallLink = `https://alltimemarket.com/app?ref=${staff.code}`;
+  const vendorLink = `https://alltimemarket.in/become-vendor?ref=${staff.code}`;
+  const appInstallLink = `https://alltimemarket.in/app?ref=${staff.code}`;
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);

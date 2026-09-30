@@ -170,8 +170,8 @@ export default function StaffDetailPage() {
   }
 
   // Links
-  const vendorLink = `https://alltimemarket.com/become-vendor?ref=${staff.code}`;
-  const appInstallLink = `https://alltimemarket.com/app?ref=${staff.code}`;
+  const vendorLink = `https://alltimemarket.in/become-vendor?ref=${staff.code}`;
+  const appInstallLink = `https://alltimemarket.in/app?ref=${staff.code}`;
 
   // Filtered lists
   const filteredVendors = (staff.referredVendors || []).filter(v => 
