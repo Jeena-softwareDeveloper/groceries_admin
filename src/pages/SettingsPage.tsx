@@ -8,6 +8,91 @@ import { settingsApi } from '../api';
 import { toast } from 'sonner';
 import { PageHeader } from '../components/ui';
 
+const SettingsContext = React.createContext<any>(null);
+
+const Input = ({ label, desc, keyName, type = 'text', placeholder = '' }: { label: string, desc?: string, keyName: string, type?: string, placeholder?: string }) => {
+  const { formData, handleChange } = React.useContext(SettingsContext);
+  return (
+    <label className="block mb-5">
+      <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
+      <input 
+        type={type} 
+        value={String(formData[keyName])} 
+        onChange={(e) => handleChange(keyName, e.target.value)} 
+        placeholder={placeholder}
+        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
+      />
+      {desc && <span className="text-xs text-slate-500 mt-1.5 block">{desc}</span>}
+    </label>
+  );
+};
+
+const Select = ({ label, keyName, options }: { label: string, keyName: string, options: string[] }) => {
+  const { formData, handleChange } = React.useContext(SettingsContext);
+  return (
+    <label className="block mb-5">
+      <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
+      <select 
+        value={String(formData[keyName])} 
+        onChange={(e) => handleChange(keyName, e.target.value)} 
+        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none bg-white focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
+      >
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+    </label>
+  );
+};
+
+const Textarea = ({ label, desc, keyName, rows = 3 }: { label: string, desc?: string, keyName: string, rows?: number }) => {
+  const { formData, handleChange } = React.useContext(SettingsContext);
+  return (
+    <label className="block mb-5">
+      <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
+      <textarea 
+        value={String(formData[keyName])} 
+        onChange={(e) => handleChange(keyName, e.target.value)} 
+        rows={rows}
+        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all resize-y"
+      />
+      {desc && <span className="text-xs text-slate-500 mt-1.5 block">{desc}</span>}
+    </label>
+  );
+};
+
+const ToggleItem = ({ icon: Icon, title, desc, keyName, color = 'slate' }: { icon?: React.ElementType, title: string, desc?: string, keyName: string, color?: string }) => {
+  const { formData, toggle } = React.useContext(SettingsContext);
+  return (
+    <div className="flex items-center justify-between py-4 border-b border-slate-100 last:border-0">
+      <div className="flex items-start gap-4">
+        {Icon && (
+          <div className={`w-10 h-10 rounded-lg bg-${color}-50 text-${color}-600 flex items-center justify-center shrink-0`}>
+            <Icon size={18} />
+          </div>
+        )}
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-900">{title}</span>
+          {desc && <span className="text-xs text-slate-500 mt-0.5">{desc}</span>}
+        </div>
+      </div>
+      <label className="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
+        <input type="checkbox" className="sr-only peer" checked={Boolean(formData[keyName])} onChange={() => toggle(keyName)} />
+        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+      </label>
+    </div>
+  );
+};
+
+const FileUploadBox = ({ title, desc }: { title: string, desc: string }) => (
+  <div className="mb-6">
+    <span className="block mb-2 font-semibold text-slate-900 text-sm">{title}</span>
+    <div className="border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex flex-col items-center justify-center p-8 text-center hover:bg-slate-100 hover:border-slate-300 transition-colors cursor-pointer">
+      <UploadCloud size={24} className="text-slate-400 mb-2" />
+      <span className="text-sm font-semibold text-slate-700">Upload Image</span>
+      <span className="text-xs text-slate-500 mt-1">{desc}</span>
+    </div>
+  </div>
+);
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('General');
   const tabs = ['General', 'Platform', 'Contact & Support', 'Features', 'Notifications', 'SEO', 'Payment', 'Security'];
@@ -149,91 +234,6 @@ export default function SettingsPage() {
       toast.success('Settings saved (mocked)!');
     }
   };
-
-const SettingsContext = React.createContext<any>(null);
-
-const Input = ({ label, desc, keyName, type = 'text', placeholder = '' }: { label: string, desc?: string, keyName: string, type?: string, placeholder?: string }) => {
-  const { formData, handleChange } = React.useContext(SettingsContext);
-  return (
-    <label className="block mb-5">
-      <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
-      <input 
-        type={type} 
-        value={String(formData[keyName])} 
-        onChange={(e) => handleChange(keyName, e.target.value)} 
-        placeholder={placeholder}
-        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-      />
-      {desc && <span className="text-xs text-slate-500 mt-1.5 block">{desc}</span>}
-    </label>
-  );
-};
-
-const Select = ({ label, keyName, options }: { label: string, keyName: string, options: string[] }) => {
-  const { formData, handleChange } = React.useContext(SettingsContext);
-  return (
-    <label className="block mb-5">
-      <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
-      <select 
-        value={String(formData[keyName])} 
-        onChange={(e) => handleChange(keyName, e.target.value)} 
-        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none bg-white focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-      >
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
-      </select>
-    </label>
-  );
-};
-
-const Textarea = ({ label, desc, keyName, rows = 3 }: { label: string, desc?: string, keyName: string, rows?: number }) => {
-  const { formData, handleChange } = React.useContext(SettingsContext);
-  return (
-    <label className="block mb-5">
-      <span className="block mb-2 font-semibold text-slate-900 text-sm">{label}</span>
-      <textarea 
-        value={String(formData[keyName])} 
-        onChange={(e) => handleChange(keyName, e.target.value)} 
-        rows={rows}
-        className="w-full px-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all resize-y"
-      />
-      {desc && <span className="text-xs text-slate-500 mt-1.5 block">{desc}</span>}
-    </label>
-  );
-};
-
-const ToggleItem = ({ icon: Icon, title, desc, keyName, color = 'slate' }: { icon?: React.ElementType, title: string, desc?: string, keyName: string, color?: string }) => {
-  const { formData, toggle } = React.useContext(SettingsContext);
-  return (
-    <div className="flex items-center justify-between py-4 border-b border-slate-100 last:border-0">
-      <div className="flex items-start gap-4">
-        {Icon && (
-          <div className={`w-10 h-10 rounded-lg bg-${color}-50 text-${color}-600 flex items-center justify-center shrink-0`}>
-            <Icon size={18} />
-          </div>
-        )}
-        <div className="flex flex-col">
-          <span className="text-sm font-bold text-slate-900">{title}</span>
-          {desc && <span className="text-xs text-slate-500 mt-0.5">{desc}</span>}
-        </div>
-      </div>
-      <label className="relative inline-flex items-center cursor-pointer ml-4 shrink-0">
-        <input type="checkbox" className="sr-only peer" checked={Boolean(formData[keyName])} onChange={() => toggle(keyName)} />
-        <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-      </label>
-    </div>
-  );
-};
-
-const FileUploadBox = ({ title, desc }: { title: string, desc: string }) => (
-  <div className="mb-6">
-    <span className="block mb-2 font-semibold text-slate-900 text-sm">{title}</span>
-    <div className="border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 flex flex-col items-center justify-center p-8 text-center hover:bg-slate-100 hover:border-slate-300 transition-colors cursor-pointer">
-      <UploadCloud size={24} className="text-slate-400 mb-2" />
-      <span className="text-sm font-semibold text-slate-700">Upload Image</span>
-      <span className="text-xs text-slate-500 mt-1">{desc}</span>
-    </div>
-  </div>
-);
 
   return (
     <SettingsContext.Provider value={{ formData, handleChange, toggle }}>

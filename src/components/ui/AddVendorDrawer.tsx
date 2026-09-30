@@ -8,6 +8,31 @@ interface AddVendorDrawerProps {
   onSave: (data: any) => Promise<void>;
 }
 
+interface DataRowProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  required?: boolean;
+}
+
+function DataRow({ label, value, onChange, type = 'text', required = false }: DataRowProps) {
+  return (
+    <div className="flex flex-col mb-3">
+      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </span>
+      <input 
+        type={type} 
+        value={value} 
+        onChange={(e) => onChange(e.target.value)}
+        className="text-[13px] text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-slate-300 focus:bg-white transition-all w-full"
+        placeholder={`Enter ${label.toLowerCase()}`}
+      />
+    </div>
+  );
+}
+
 export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProps) {
   const [loading, setLoading] = useState(false);
   const [districts, setDistricts] = useState<any[]>([]);
@@ -57,21 +82,6 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
 
   const filteredAreas = areas.filter(a => a.districtId === formData.districtId);
 
-  const DataRow = ({ label, field, type = 'text', required = false }: { label: string; field: string; type?: string; required?: boolean }) => (
-    <div className="flex flex-col mb-3">
-      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
-      </span>
-      <input 
-        type={type} 
-        value={(formData as any)[field]} 
-        onChange={(e) => handleInputChange(field, e.target.value)}
-        className="text-[13px] text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-slate-300 focus:bg-white transition-all w-full"
-        placeholder={`Enter ${label.toLowerCase()}`}
-      />
-    </div>
-  );
-
   return (
     <>
       <div 
@@ -104,10 +114,32 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
           <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm space-y-4">
             <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">Basic Details</h3>
             
-            <DataRow label="Shop Name" field="shopName" required />
-            <DataRow label="Email Address" field="email" type="email" required />
-            <DataRow label="Phone Number" field="phone" type="tel" required />
-            <DataRow label="Full Address" field="address" required />
+            <DataRow 
+              label="Shop Name" 
+              value={formData.shopName} 
+              onChange={(val) => handleInputChange('shopName', val)} 
+              required 
+            />
+            <DataRow 
+              label="Email Address" 
+              value={formData.email} 
+              onChange={(val) => handleInputChange('email', val)} 
+              type="email" 
+              required 
+            />
+            <DataRow 
+              label="Phone Number" 
+              value={formData.phone} 
+              onChange={(val) => handleInputChange('phone', val)} 
+              type="tel" 
+              required 
+            />
+            <DataRow 
+              label="Full Address" 
+              value={formData.address} 
+              onChange={(val) => handleInputChange('address', val)} 
+              required 
+            />
             
             <div className="flex flex-col mb-3">
               <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">

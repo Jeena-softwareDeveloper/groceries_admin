@@ -10,6 +10,20 @@ interface ProductReviewDrawerProps {
   onRequestChanges: (id: string, notes: string) => Promise<void>;
 }
 
+const SectionTitle = ({ icon: Icon, title }: { icon: any, title: string }) => (
+  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+    <Icon className="w-4 h-4 text-slate-400" />
+    {title}
+  </h3>
+);
+
+const DataRow = ({ label, value, col = false }: { label: string, value: React.ReactNode, col?: boolean }) => (
+  <div className={`flex ${col ? 'flex-col gap-1.5' : 'items-start justify-between py-2 border-b border-slate-100 last:border-0'}`}>
+    <span className="text-sm text-slate-500 font-medium">{label}</span>
+    <span className={`text-sm font-semibold text-slate-900 ${col ? '' : 'text-right'}`}>{value || 'N/A'}</span>
+  </div>
+);
+
 export function ProductReviewDrawer({ isOpen, onClose, approval, onApprove, onReject, onRequestChanges }: ProductReviewDrawerProps) {
   const [actionMode, setActionMode] = useState<'REJECT' | 'REQUEST_CHANGES' | null>(null);
   const [notes, setNotes] = useState('');
@@ -38,20 +52,6 @@ export function ProductReviewDrawer({ isOpen, onClose, approval, onApprove, onRe
       setNotes('');
     }
   };
-
-  const SectionTitle = ({ icon: Icon, title }: { icon: any, title: string }) => (
-    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
-      <Icon className="w-4 h-4 text-slate-400" />
-      {title}
-    </h3>
-  );
-
-  const DataRow = ({ label, value, col = false }: { label: string, value: React.ReactNode, col?: boolean }) => (
-    <div className={`flex ${col ? 'flex-col gap-1.5' : 'items-start justify-between py-2 border-b border-slate-100 last:border-0'}`}>
-      <span className="text-sm text-slate-500 font-medium">{label}</span>
-      <span className={`text-sm font-semibold text-slate-900 ${col ? '' : 'text-right'}`}>{value || 'N/A'}</span>
-    </div>
-  );
 
   return (
     <>
