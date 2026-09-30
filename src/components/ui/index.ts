@@ -15,5 +15,9 @@ export * from './ImageUpload';
 export * from './AddVendorDrawer';
 export * from './AddStaffDrawer';
 export * from './StaffQrModal';
+export * from './VendorViewModal';
+export * from './CustomerViewModal';
+export * from './StaffInfoModal';
 export * from './SelectDropdown';
 export type { ButtonProps } from './Button';
+

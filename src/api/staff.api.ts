@@ -31,4 +31,8 @@ export const staffApi = {
   toggleStatus: (id: string) => {
     return api.patch<ApiResponse<Staff>>(`/admin/staffs/${id}/toggle-status`).then(r => r.data);
   },
+
+  recordAudit: (id: string, data: { action: string; platform?: string; deviceInfo?: string; ipAddress?: string; metadata?: any }) => {
+    return api.post<ApiResponse<any>>(`/admin/staffs/${id}/audit`, data).then(r => r.data);
+  },
 };

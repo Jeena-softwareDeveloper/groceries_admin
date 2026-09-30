@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { staffApi } from '../api';
 import { useApiData } from '../hooks';
 import { 
@@ -24,12 +25,14 @@ import {
   Copy, 
   Check, 
   Award, 
-  Briefcase 
+  Briefcase,
+  Eye
 } from 'lucide-react';
 import type { Staff, CreateStaffInput, UpdateStaffInput } from '../types/staff.types';
 import { toast } from 'sonner';
 
 export default function StaffsPage() {
+  const navigate = useNavigate();
   const { data: staffs = [], loading, refetch } = useApiData<Staff[]>(() => staffApi.getAll());
   
   const [search, setSearch] = useState('');
@@ -247,6 +250,14 @@ export default function StaffsPage() {
       cellClassName: 'pr-6',
       cell: (s) => (
         <div className="flex items-center gap-1">
+          <button 
+            onClick={() => navigate(`/staffs/${s.id}`)}
+            className="p-1.5 rounded-lg text-primary-600 hover:text-primary-700 hover:bg-primary-50 transition-colors"
+            title="View Staff Details, QR Audits & Referrals"
+          >
+            <Eye size={15} />
+          </button>
+
           <button 
             onClick={() => handleOpenEdit(s)}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
