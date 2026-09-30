@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { staffApi } from '../api';
 import { useApiData } from '../hooks';
 import { 
-  PageHeader, 
   SearchBar, 
   DataTable, 
-  StatusBadge, 
   EmptyState, 
   ColumnDef, 
   ConfirmModal, 
@@ -26,7 +24,11 @@ import {
   Check, 
   Award, 
   Briefcase,
-  Eye
+  Eye,
+  TrendingUp,
+  Zap,
+  Shield,
+  MapPin
 } from 'lucide-react';
 import type { Staff, CreateStaffInput, UpdateStaffInput } from '../types/staff.types';
 import { toast } from 'sonner';
@@ -128,28 +130,45 @@ export default function StaffsPage() {
       (s.email && s.email.toLowerCase().includes(search.toLowerCase()))
     );
 
+  // Avatar color palette — cycles through a rich set
+  const avatarPalettes = [
+    { bg: 'from-emerald-500 to-teal-600', ring: 'ring-emerald-300' },
+    { bg: 'from-violet-500 to-purple-600', ring: 'ring-violet-300' },
+    { bg: 'from-amber-500 to-orange-600', ring: 'ring-amber-300' },
+    { bg: 'from-blue-500 to-indigo-600', ring: 'ring-blue-300' },
+    { bg: 'from-rose-500 to-pink-600', ring: 'ring-rose-300' },
+    { bg: 'from-cyan-500 to-sky-600', ring: 'ring-cyan-300' },
+  ];
+
   const columns: ColumnDef<Staff>[] = [
     {
       key: 'id',
       header: '#',
       headerClassName: 'pl-6',
-      cellClassName: 'pl-6 font-semibold text-slate-400',
-      cell: (_, index) => String(index + 1).padStart(2, '0')
+      cellClassName: 'pl-6',
+      cell: (_, index) => (
+        <span className="text-xs font-bold text-slate-400 font-mono">
+          {String(index + 1).padStart(2, '0')}
+        </span>
+      )
     },
     {
       key: 'staff',
       header: 'STAFF MEMBER',
-      cell: (s) => (
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 font-bold text-sm flex items-center justify-center shrink-0 border border-emerald-200">
-            {s.name.charAt(0).toUpperCase()}
+      cell: (s, index) => {
+        const palette = avatarPalettes[index % avatarPalettes.length];
+        return (
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${palette.bg} text-white font-bold text-sm flex items-center justify-center shrink-0 ring-2 ${palette.ring} ring-offset-1 shadow-sm`}>
+              {s.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-slate-900 text-[13px] truncate">{s.name}</span>
+              <span className="text-[11px] text-slate-400 truncate">{s.email || 'No email'}</span>
+            </div>
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="font-semibold text-slate-800 text-[13px] truncate">{s.name}</span>
-            <span className="text-[11px] text-slate-400 truncate">{s.email || 'No email provided'}</span>
-          </div>
-        </div>
-      )
+        );
+      }
     },
     {
       key: 'code',
@@ -157,61 +176,69 @@ export default function StaffsPage() {
       cell: (s) => (
         <button
           onClick={() => handleCopyCode(s.code)}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-mono text-xs font-bold hover:bg-indigo-100 transition-colors group cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border font-mono text-xs font-bold transition-all cursor-pointer group"
+          style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+            borderColor: '#86efac',
+            color: '#166534',
+          }}
           title="Click to copy referral code"
         >
           <span>{s.code}</span>
           {copiedCode === s.code ? (
-            <Check size={12} className="text-emerald-600" />
+            <Check size={11} className="text-emerald-600" />
           ) : (
-            <Copy size={12} className="text-indigo-400 group-hover:text-indigo-600" />
+            <Copy size={11} className="text-emerald-400 group-hover:text-emerald-700 transition-colors" />
           )}
         </button>
       )
     },
     {
       key: 'designation',
-      header: 'ROLE / DESIGNATION',
+      header: 'DESIGNATION',
       hideOnMobile: true,
       cell: (s) => (
-        <span className="inline-flex items-center gap-1.5 text-xs text-slate-700 font-medium bg-slate-100 px-2 py-0.5 rounded-md">
-          <Briefcase size={12} className="text-slate-400" />
-          {s.designation || 'Field Representative'}
+        <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 font-medium bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+          <Briefcase size={11} className="text-slate-400" />
+          {s.designation || 'Field Executive'}
         </span>
       )
     },
     {
       key: 'phone',
       header: 'PHONE',
-      cellClassName: 'font-mono text-xs font-medium text-slate-700',
       cell: (s) => (
-        <a href={`tel:${s.phone}`} className="hover:text-emerald-600 hover:underline">
+        <a
+          href={`tel:${s.phone}`}
+          className="font-mono text-xs font-semibold text-slate-700 hover:text-emerald-600 hover:underline transition-colors"
+        >
           {s.phone}
         </a>
       )
     },
     {
       key: 'location',
-      header: 'ASSIGNED AREA',
+      header: 'AREA',
       hideOnMobile: true,
       cell: (s) => (
-        <span className="text-xs text-slate-600">
-          {s.area?.name ? `${s.area.name}, ${s.district?.name}` : s.district?.name ? s.district.name : 'Platform-wide'}
+        <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+          <MapPin size={11} className="text-slate-400 shrink-0" />
+          {s.area?.name ? `${s.area.name}, ${s.district?.name}` : s.district?.name || 'Platform-wide'}
         </span>
       )
     },
     {
       key: 'referrals',
-      header: 'VENDORS REFERRED',
+      header: 'VENDORS',
       cell: (s) => (
         <div className="flex items-center gap-1.5">
-          <div className="w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <Store size={13} />
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-sm">
+            <Store size={12} />
           </div>
-          <span className="font-bold text-slate-800 text-xs">
-            {s.vendorsCount || 0}
-          </span>
-          <span className="text-[11px] text-slate-400">vendors</span>
+          <div className="flex flex-col">
+            <span className="font-extrabold text-slate-900 text-sm leading-none">{s.vendorsCount || 0}</span>
+            <span className="text-[10px] text-slate-400 leading-none">referred</span>
+          </div>
         </div>
       )
     },
@@ -220,26 +247,27 @@ export default function StaffsPage() {
       header: 'STATUS',
       hideOnMobile: true,
       cell: (s) => (
-        <StatusBadge 
-          status={s.isActive ? 'APPROVED' : 'REJECTED'} 
-          colorMap={{
-            APPROVED: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-            REJECTED: { bg: 'bg-slate-100', text: 'text-slate-500', border: 'border-slate-200' },
-            PENDING: { bg: 'bg-slate-100', text: 'text-slate-500', border: 'border-slate-200' }
-          }} 
-        />
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
+          s.isActive
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            : 'bg-slate-100 text-slate-500 border-slate-200'
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${s.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`} />
+          {s.isActive ? 'Active' : 'Inactive'}
+        </span>
       )
     },
     {
       key: 'qr',
-      header: 'QR CODE',
+      header: 'QR',
       cell: (s) => (
         <button
           onClick={() => handleOpenQr(s)}
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors shadow-2xs cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white text-xs font-bold transition-all hover:scale-105 shadow-sm cursor-pointer"
+          style={{ background: 'linear-gradient(135deg, #059669, #0d9488)' }}
         >
-          <QrCode size={13} />
-          <span>View QR</span>
+          <QrCode size={12} />
+          <span>QR</span>
         </button>
       )
     },
@@ -253,33 +281,33 @@ export default function StaffsPage() {
           <button 
             onClick={() => navigate(`/staffs/${s.id}`)}
             className="p-1.5 rounded-lg text-primary-600 hover:text-primary-700 hover:bg-primary-50 transition-colors"
-            title="View Staff Details, QR Audits & Referrals"
+            title="View Staff Details"
           >
-            <Eye size={15} />
+            <Eye size={14} />
           </button>
 
           <button 
             onClick={() => handleOpenEdit(s)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
             title="Edit Staff"
           >
-            <Edit2 size={15} />
+            <Edit2 size={14} />
           </button>
           
           <button 
             onClick={() => setConfirmModal({ isOpen: true, staff: s, action: 'toggle' })}
             className={`p-1.5 rounded-lg transition-colors ${s.isActive ? 'text-amber-500 hover:bg-amber-50' : 'text-emerald-600 hover:bg-emerald-50'}`}
-            title={s.isActive ? 'Deactivate Staff' : 'Activate Staff'}
+            title={s.isActive ? 'Deactivate' : 'Activate'}
           >
-            <Power size={15} />
+            <Power size={14} />
           </button>
 
           <button 
             onClick={() => setConfirmModal({ isOpen: true, staff: s, action: 'delete' })}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-red-600 hover:bg-red-50 transition-colors"
             title="Delete Staff"
           >
-            <Trash2 size={15} />
+            <Trash2 size={14} />
           </button>
         </div>
       )
@@ -287,131 +315,236 @@ export default function StaffsPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-6 w-full text-slate-900 pb-12">
+    <div className="flex flex-col gap-0 w-full text-slate-900 pb-12">
       
-      {/* Page Header */}
-      <PageHeader
-        title="Staffs & Field Agents"
-        description="Manage field marketing representatives, track vendor onboarding referrals and generate QR codes."
-        action={
+      {/* ── ULTRA PREMIUM HERO HEADER ── */}
+      <div
+        className="relative overflow-hidden rounded-2xl mb-6"
+        style={{
+          background: 'linear-gradient(135deg, #064e3b 0%, #065f46 40%, #047857 70%, #059669 100%)',
+        }}
+      >
+        {/* Decorative blobs */}
+        <div
+          className="absolute -top-12 -right-12 w-56 h-56 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #a7f3d0, transparent 70%)' }}
+        />
+        <div
+          className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #6ee7b7, transparent 70%)' }}
+        />
+        {/* Corner grid pattern */}
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(255,255,255,0.5) 24px, rgba(255,255,255,0.5) 25px), repeating-linear-gradient(90deg, transparent, transparent 24px, rgba(255,255,255,0.5) 24px, rgba(255,255,255,0.5) 25px)',
+          }}
+        />
+
+        <div className="relative px-6 py-6 flex items-center justify-between gap-4">
+          {/* Left — Brand + Title */}
+          <div className="flex items-center gap-4">
+            {/* ATM Logo box */}
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-lg border border-white/20"
+              style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)' }}
+            >
+              <img
+                src="/logo.png"
+                alt="ATM"
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  (e.target as HTMLImageElement).parentElement!.innerHTML = '<span style="font-size:22px">🛒</span>';
+                }}
+              />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="text-emerald-200 text-xs font-semibold tracking-widest uppercase">All Time Market</p>
+                <span className="px-1.5 py-0.5 rounded-md bg-emerald-400/20 border border-emerald-300/30 text-emerald-200 text-[10px] font-bold tracking-wider">ADMIN</span>
+              </div>
+              <h1 className="text-2xl font-black text-white leading-tight tracking-tight">Field Executives</h1>
+              <p className="text-emerald-200/80 text-xs mt-0.5">Manage staff, referral codes &amp; QR campaigns</p>
+            </div>
+          </div>
+
+          {/* Right — CTA */}
           <button
             onClick={handleOpenAdd}
-            className="h-10 px-4 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-emerald-900 text-sm font-black transition-all hover:scale-105 active:scale-95 shadow-lg shrink-0 cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, #a7f3d0, #6ee7b7)' }}
           >
             <Plus size={16} />
-            <span>Add Staff Member</span>
+            <span>Add Staff</span>
           </button>
-        }
-      />
-
-      {/* Stats Cards Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
-        {/* Total Staff */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
-            <Users size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Staff</span>
-            <h3 className="text-2xl font-bold text-slate-900 m-0 leading-tight">{totalStaff}</h3>
-          </div>
         </div>
 
-        {/* Active Executives */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <UserCheck size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Field Staff</span>
-            <h3 className="text-2xl font-bold text-emerald-600 m-0 leading-tight">{activeStaff}</h3>
-          </div>
+        {/* ── Glassmorphism Stat Strip ── */}
+        <div
+          className="mx-4 mb-4 rounded-xl grid grid-cols-2 sm:grid-cols-4 divide-x divide-white/10 overflow-hidden border border-white/10"
+          style={{ background: 'rgba(0,0,0,0.18)', backdropFilter: 'blur(12px)' }}
+        >
+          {[
+            { icon: Users, label: 'Total Staff', value: totalStaff, color: 'text-blue-300' },
+            { icon: UserCheck, label: 'Active Staff', value: activeStaff, color: 'text-emerald-300' },
+            { icon: Store, label: 'Vendors Onboarded', value: totalReferrals, color: 'text-amber-300' },
+            { 
+              icon: Award, 
+              label: 'Top Referrer', 
+              value: topPerformer ? topPerformer.name.split(' ')[0] : '—', 
+              sub: topPerformer ? `${topPerformer.vendorsCount || 0} vendors` : '',
+              color: 'text-purple-300' 
+            },
+          ].map((stat, i) => (
+            <div key={i} className="flex items-center gap-3 px-5 py-3.5">
+              <stat.icon className={`${stat.color} shrink-0`} size={20} />
+              <div className="min-w-0">
+                <div className={`text-xl font-black ${stat.color} leading-none truncate`}>{stat.value}</div>
+                <div className="text-[11px] text-white/50 font-medium leading-tight mt-0.5 truncate">{stat.label}</div>
+                {(stat as any).sub && <div className="text-[10px] text-white/30 leading-none">{(stat as any).sub}</div>}
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* Total Vendors Referred */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Store size={22} />
-          </div>
-          <div>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Vendors Onboarded</span>
-            <h3 className="text-2xl font-bold text-slate-900 m-0 leading-tight">{totalReferrals}</h3>
-          </div>
-        </div>
-
-        {/* Top Referrer */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-            <Award size={22} />
-          </div>
-          <div className="min-w-0">
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Top Referrer</span>
-            <h4 className="text-sm font-bold text-slate-900 m-0 truncate">
-              {topPerformer ? `${topPerformer.name} (${topPerformer.vendorsCount || 0})` : '—'}
-            </h4>
-          </div>
-        </div>
-
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        
+      {/* ── FILTER + SEARCH BAR ── */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4">
         {/* Status Tabs */}
-        <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
+        <div
+          className="flex p-1 rounded-xl border border-slate-200 bg-slate-50 w-full sm:w-auto"
+        >
           {[
-            { id: 'all', label: `All (${totalStaff})` },
-            { id: 'active', label: `Active (${activeStaff})` },
-            { id: 'inactive', label: `Inactive (${totalStaff - activeStaff})` },
+            { id: 'all', label: 'All', count: totalStaff },
+            { id: 'active', label: 'Active', count: activeStaff, dot: 'bg-emerald-500' },
+            { id: 'inactive', label: 'Inactive', count: totalStaff - activeStaff, dot: 'bg-slate-400' },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id as any)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 filter === tab.id 
-                  ? 'bg-white text-slate-900 shadow-xs' 
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80' 
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
+              {tab.dot && <span className={`w-1.5 h-1.5 rounded-full ${tab.dot}`} />}
               {tab.label}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold ${
+                filter === tab.id ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+              }`}>
+                {tab.count}
+              </span>
             </button>
           ))}
         </div>
 
         {/* Search */}
-        <div className="w-full sm:w-72">
+        <div className="w-full sm:w-80">
           <SearchBar 
             value={search} 
             onChange={setSearch} 
-            placeholder="Search by name, code, phone..." 
+            placeholder="Search name, code, phone, role…" 
           />
         </div>
-
       </div>
 
-      {/* Staff Table */}
-      <DataTable
-        columns={columns}
-        data={displayedStaffs}
-        loading={loading}
-        emptyState={
-          <EmptyState
-            icon={Users}
-            title="No staff members found"
-            description={search ? `No staff matching "${search}"` : "Register field marketing executives to start issuing referral QR codes."}
-            action={
-              <button
-                onClick={handleOpenAdd}
-                className="h-9 px-4 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
-              >
-                <Plus size={14} />
-                <span>Register First Staff</span>
-              </button>
-            }
-          />
-        }
-      />
+      {/* ── PREMIUM STAFF TABLE ── */}
+      <div className="rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm bg-white">
+        {/* Table Header Bar */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-sm">
+              <Users size={13} className="text-white" />
+            </div>
+            <span className="text-sm font-bold text-slate-800">Staff Directory</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200">
+              {displayedStaffs.length} members
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+            <Zap size={12} className="text-amber-500" />
+            <span>Live data</span>
+          </div>
+        </div>
+
+        <DataTable
+          columns={columns}
+          data={displayedStaffs}
+          loading={loading}
+          emptyState={
+            <EmptyState
+              icon={Users}
+              title="No staff members found"
+              description={search ? `No staff matching "${search}"` : "Register field marketing executives to start issuing referral QR codes."}
+              action={
+                <button
+                  onClick={handleOpenAdd}
+                  className="h-9 px-5 rounded-xl text-white text-xs font-bold hover:scale-105 transition-transform flex items-center gap-2 shadow-sm cursor-pointer"
+                  style={{ background: 'linear-gradient(135deg, #059669, #0d9488)' }}
+                >
+                  <Plus size={14} />
+                  <span>Register First Staff</span>
+                </button>
+              }
+            />
+          }
+        />
+      </div>
+
+      {/* ── PERFORMANCE LEADERBOARD (if data exists) ── */}
+      {staffList.length > 0 && (
+        <div className="mt-5 rounded-2xl border border-slate-200/80 overflow-hidden bg-white shadow-sm">
+          <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100 bg-gradient-to-r from-amber-50 to-white">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
+              <TrendingUp size={13} className="text-white" />
+            </div>
+            <span className="text-sm font-bold text-slate-800">Referral Leaderboard</span>
+            <span className="text-xs text-slate-400 font-medium">— Top performers</span>
+          </div>
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {[...staffList]
+              .sort((a, b) => (b.vendorsCount || 0) - (a.vendorsCount || 0))
+              .slice(0, 6)
+              .map((s, i) => {
+                const palette = avatarPalettes[i % avatarPalettes.length];
+                const medals = ['🥇', '🥈', '🥉'];
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => navigate(`/staffs/${s.id}`)}
+                    className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all group cursor-pointer text-left"
+                  >
+                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${palette.bg} text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm`}>
+                      {s.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-slate-900 text-xs truncate">{s.name}</span>
+                        {medals[i] && <span className="text-sm">{medals[i]}</span>}
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <div
+                          className="h-1.5 rounded-full"
+                          style={{
+                            width: `${Math.max(8, ((s.vendorsCount || 0) / Math.max(topPerformer?.vendorsCount || 1, 1)) * 80)}px`,
+                            background: 'linear-gradient(90deg, #059669, #0d9488)',
+                          }}
+                        />
+                        <span className="text-[11px] text-slate-500 font-semibold">{s.vendorsCount || 0} vendors</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Shield size={11} className={`transition-colors ${s.isActive ? 'text-emerald-500' : 'text-slate-300'}`} />
+                      <Eye size={12} className="text-slate-300 group-hover:text-emerald-600 transition-colors" />
+                    </div>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      )}
 
       {/* Add / Edit Staff Drawer */}
       <AddStaffDrawer
