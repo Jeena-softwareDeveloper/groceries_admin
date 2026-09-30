@@ -28,12 +28,14 @@ export default function VendorsPage() {
     phone: r.mobileNumber || '',
     status: r.status,
     area: { name: r.area?.name || 'Unknown', district: { name: r.district?.name || 'Unknown' } },
+    staffReferralCode: r.staffReferralCode || '',
     isRequest: true
   }));
 
   const normalizedVendors = allVendors.map(v => ({
     ...v,
     phone: v.phone || '',
+    staffReferralCode: v.staffReferralCode || '',
     isRequest: false
   }));
 
@@ -123,7 +125,8 @@ export default function VendorsPage() {
     .filter(v => 
       v.shopName.toLowerCase().includes(search.toLowerCase()) || 
       v.email.toLowerCase().includes(search.toLowerCase()) ||
-      (v.phone && v.phone.toLowerCase().includes(search.toLowerCase()))
+      (v.phone && v.phone.toLowerCase().includes(search.toLowerCase())) ||
+      (v.staffReferralCode && v.staffReferralCode.toLowerCase().includes(search.toLowerCase()))
     );
 
   const columns: ColumnDef<Vendor>[] = [
@@ -191,6 +194,18 @@ export default function VendorsPage() {
       header: 'Location',
       cellClassName: 'text-slate-600 font-medium',
       cell: (v) => `${v.area.name}, ${v.area.district.name}`
+    },
+    {
+      key: 'referral',
+      header: 'REFERRED BY',
+      hideOnMobile: true,
+      cell: (v) => v.staffReferralCode ? (
+        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-200/60 text-indigo-700 text-xs font-semibold">
+          {v.staffReferralCode}
+        </span>
+      ) : (
+        <span className="text-slate-300 text-xs">—</span>
+      )
     },
     {
       key: 'status',

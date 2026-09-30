@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard, MapPin, Map, Grid, Store, Image, Layers, Truck, Tag, Ticket, BarChart3, Users, Bell, Settings, LogOut, Search, HelpCircle, Menu, ClipboardList, X, FileText, QrCode
+  LayoutDashboard, MapPin, Map, Grid, Store, Image, Layers, Truck, Tag, Ticket, BarChart3, Users, Bell, Settings, LogOut, Search, HelpCircle, Menu, ClipboardList, X, FileText, QrCode, UserCheck
 } from 'lucide-react';
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { path: '/areas', label: 'Areas', icon: MapPin },
   { path: '/categories', label: 'Categories', icon: Grid },
   { path: '/vendors', label: 'Vendors', icon: Store },
+  { path: '/staffs', label: 'Staffs', icon: UserCheck },
   { path: '/product-approvals', label: 'Product Approvals', icon: ClipboardList },
   { path: '/settlements', label: 'Settlements', icon: Tag },
   { path: '/banners', label: 'Banners', icon: Image },

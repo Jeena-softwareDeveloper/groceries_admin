@@ -114,6 +114,7 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
         govtIdUrl: vendor.govtIdUrl || '',
         gstCertUrl: vendor.gstCertUrl || vendor.gstDocUrl || '',
         fssaiCertUrl: vendor.fssaiCertUrl || vendor.fssaiDocUrl || '',
+        staffReferralCode: vendor.staffReferralCode || '',
       });
       setRejectMode(false);
       setRejectReason('');
@@ -213,6 +214,7 @@ export function VendorReviewDrawer({ isOpen, onClose, vendor, mode, onApprove, o
               <DataRow label="Owner Name" value={vendor.ownerName || '-'} field="ownerName" mode={mode} formData={formData} onInputChange={handleInputChange} />
               <DataRow label="Mobile Number" value={vendor.mobileNumber || vendor.phone} field="mobileNumber" mode={mode} formData={formData} onInputChange={handleInputChange} />
               <DataRow label="Email Address" value={vendor.email || '-'} field="email" mode={mode} formData={formData} onInputChange={handleInputChange} />
+              <DataRow label="Referred By (Staff)" value={vendor.staffReferralCode || '-'} field="staffReferralCode" mode={mode} formData={formData} onInputChange={handleInputChange} />
             </div>
             {mode === 'edit' ? (
               <div className="flex flex-col mb-3">

@@ -13,6 +13,17 @@ export interface Vendor {
   productsCount?: number;
   status: VendorStatus;
   area: Area;
+  staffReferralCode?: string;
+}
+
+export interface CreateVendorInput {
+  shopName: string;
+  email: string;
+  phone: string;
+  address: string;
+  districtId: string;
+  areaId: string;
+  staffReferralCode?: string;
 }
 
 export interface RejectVendorDto {

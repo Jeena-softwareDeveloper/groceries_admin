@@ -15,9 +15,10 @@ interface DataRowProps {
   onChange: (value: string) => void;
   type?: string;
   required?: boolean;
+  placeholder?: string;
 }
 
-function DataRow({ label, value, onChange, type = 'text', required = false }: DataRowProps) {
+function DataRow({ label, value, onChange, type = 'text', required = false, placeholder }: DataRowProps) {
   return (
     <div className="flex flex-col mb-3">
       <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
@@ -28,7 +29,7 @@ function DataRow({ label, value, onChange, type = 'text', required = false }: Da
         value={value} 
         onChange={(e) => onChange(e.target.value)}
         className="text-[13px] text-slate-800 font-medium bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none focus:border-slate-300 focus:bg-white transition-all w-full"
-        placeholder={`Enter ${label.toLowerCase()}`}
+        placeholder={placeholder || `Enter ${label.toLowerCase()}`}
       />
     </div>
   );
@@ -45,7 +46,8 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
     phone: '',
     address: '',
     districtId: '',
-    areaId: ''
+    areaId: '',
+    staffReferralCode: ''
   });
 
   useEffect(() => {
@@ -56,7 +58,8 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
         phone: '',
         address: '',
         districtId: '',
-        areaId: ''
+        areaId: '',
+        staffReferralCode: ''
       });
       districtApi.getAll().then(res => setDistricts(res.data || [])).catch(console.error);
       areaApi.getAll().then(res => setAreas(res.data || [])).catch(console.error);
@@ -179,6 +182,13 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
                 ))}
               </select>
             </div>
+
+            <DataRow 
+              label="Staff Referral Code / Name" 
+              value={formData.staffReferralCode} 
+              onChange={(val) => handleInputChange('staffReferralCode', val)} 
+              placeholder="e.g. STF-01 or Staff Name (Optional)"
+            />
 
           </div>
         </div>

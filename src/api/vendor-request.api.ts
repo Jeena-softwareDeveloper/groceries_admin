@@ -39,6 +39,7 @@ export interface VendorRequest {
   reviewedBy?: string;
   reviewedAt?: string;
   submittedAt?: string;
+  staffReferralCode?: string;
   createdAt: string;
   updatedAt: string;
   customer?: { id: string; name?: string; phone: string; email?: string };

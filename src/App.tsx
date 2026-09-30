@@ -7,6 +7,7 @@ import DistrictsPage from './pages/DistrictsPage';
 import AreasPage from './pages/AreasPage';
 import CategoriesPage from './pages/CategoriesPage';
 import VendorsPage from './pages/VendorsPage';
+import StaffsPage from './pages/StaffsPage';
 import SettingsPage from './pages/SettingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import { BannersPage, CustomersPage, NotificationsPage, OffersPage, CouponsPage, MicroBannersPage, DeliveryChargesPage } from './pages/AdminExtras';
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="areas" element={<AreasPage />} />
             <Route path="categories" element={<CategoriesPage />} />
             <Route path="vendors" element={<VendorsPage />} />
+            <Route path="staffs" element={<StaffsPage />} />
             <Route path="product-approvals" element={<ProductApprovalsPage />} />
             <Route path="settlements" element={<SettlementsPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
