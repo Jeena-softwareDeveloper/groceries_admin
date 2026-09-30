@@ -25,6 +25,7 @@ export default function VendorsPage() {
     id: r.id,
     shopName: r.shopName || 'Unknown Shop',
     email: r.email || 'No Email',
+    phone: r.mobileNumber || '',
     status: r.status,
     area: { name: r.area?.name || 'Unknown', district: { name: r.district?.name || 'Unknown' } },
     isRequest: true
@@ -32,6 +33,7 @@ export default function VendorsPage() {
 
   const normalizedVendors = allVendors.map(v => ({
     ...v,
+    phone: v.phone || '',
     isRequest: false
   }));
 
@@ -118,7 +120,11 @@ export default function VendorsPage() {
 
   const displayedVendors = mergedList
     .filter(v => (filter ? v.status === filter : true))
-    .filter(v => v.shopName.toLowerCase().includes(search.toLowerCase()) || v.email.toLowerCase().includes(search.toLowerCase()));
+    .filter(v => 
+      v.shopName.toLowerCase().includes(search.toLowerCase()) || 
+      v.email.toLowerCase().includes(search.toLowerCase()) ||
+      (v.phone && v.phone.toLowerCase().includes(search.toLowerCase()))
+    );
 
   const columns: ColumnDef<Vendor>[] = [
     {
@@ -166,6 +172,19 @@ export default function VendorsPage() {
       hideOnMobile: true,
       cellClassName: 'text-slate-500 font-medium',
       cell: (v) => v.email
+    },
+    {
+      key: 'phone',
+      header: 'Phone',
+      hideOnMobile: true,
+      cellClassName: 'text-slate-700 font-medium font-mono text-xs',
+      cell: (v) => v.phone ? (
+        <a href={`tel:${v.phone}`} className="hover:text-emerald-600 hover:underline">
+          {v.phone}
+        </a>
+      ) : (
+        <span className="text-slate-300">—</span>
+      )
     },
     {
       key: 'location',

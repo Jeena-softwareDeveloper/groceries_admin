@@ -6,6 +6,7 @@ export interface Vendor {
   id: string;
   shopName: string;
   email: string;
+  phone?: string;
   code?: string;
   logoUrl?: string;
   turnover?: number;
