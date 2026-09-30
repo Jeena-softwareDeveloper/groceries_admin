@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Building, Loader2, Save } from 'lucide-react';
 import { districtApi, areaApi } from '../../api';
+import { toast } from 'sonner';
 
 interface AddVendorDrawerProps {
   isOpen: boolean;
@@ -69,8 +70,10 @@ export function AddVendorDrawer({ isOpen, onClose, onSave }: AddVendorDrawerProp
       setLoading(true);
       await onSave(formData);
       onClose();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      const msg = e?.response?.data?.error?.message || e?.message || 'Failed to create vendor';
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
