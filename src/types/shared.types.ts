@@ -1,8 +1,10 @@
 export interface HealthStatus {
-  status: 'ok' | 'error';
+  status: 'ok' | 'degraded' | 'down' | 'error';
+  timestamp?: string;
+  version?: string;
   services: {
-    database: 'up' | 'down';
-    redis: 'up' | 'down';
+    database: 'up' | 'down' | 'unknown';
+    redis: 'up' | 'down' | 'unknown';
   };
 }
 

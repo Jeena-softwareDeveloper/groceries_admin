@@ -34,7 +34,7 @@ export function BannersPage() {
     try {
       const payload = {
         title,
-        imageUrl: imageUrl || 'https://placehold.co/800x300',
+        imageUrl: imageUrl || '',
         videoUrl: videoUrl || null,
         type, row,
         themeColor, themeColorEnd,
@@ -99,7 +99,7 @@ export function BannersPage() {
       header: 'Preview',
       cell: (b) => (
         <div className="flex items-center gap-2">
-          <img src={b.imageUrl || 'https://placehold.co/100x40'} alt={b.title} className="rounded border border-slate-200 w-16 h-8 sm:w-20 sm:h-10 object-cover shrink-0" />
+          <img src={b.imageUrl || ''} alt={b.title} className="rounded border border-slate-200 w-16 h-8 sm:w-20 sm:h-10 object-cover shrink-0" />
           {b.type === 'VIDEO' && (
             <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded font-bold">VIDEO</span>
           )}
@@ -622,7 +622,7 @@ export function CustomersPage() {
 
 
 export function MicroBannersPage() {
-  const [items, setItems] = useState<Array<{ id: string; title: string; isActive: boolean }>>([]);
+  const [items, setItems] = useState<Array<{ id: string; title: string; isActive: boolean; imageUrl?: string }>>([]);
   const [title, setTitle] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -636,7 +636,7 @@ export function MicroBannersPage() {
       if (editingId) {
         await adminExtrasApi.microBanners.update(editingId, { title, isActive: true });
       } else {
-        await adminExtrasApi.microBanners.create({ title, imageUrl: 'https://placehold.co/400x100', isActive: true });
+        await adminExtrasApi.microBanners.create({ title, imageUrl: '', isActive: true });
       }
       setTitle('');
       setEditingId(null);
@@ -714,7 +714,7 @@ export function MicroBannersPage() {
               {items.map((b, i) => (
                 <tr key={b.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
                   <td className="p-4 text-sm font-medium text-slate-900">{i + 1}</td>
-                  <td className="p-4"><img src="https://placehold.co/100x40" alt="Micro Banner" className="rounded border border-slate-200" /></td>
+                  <td className="p-4">{b.imageUrl ? <img src={b.imageUrl} alt="Micro Banner" className="rounded border border-slate-200 w-16 h-8 object-cover" /> : <span className="text-xs text-slate-400">No image</span>}</td>
                   <td className="p-4 text-sm font-medium text-slate-900">{b.title}</td>
                   <td className="p-4 text-sm align-middle">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${b.isActive !== false ? 'bg-green-50 text-green-600 border-green-200' : 'bg-red-50 text-red-600 border-red-200'}`}>

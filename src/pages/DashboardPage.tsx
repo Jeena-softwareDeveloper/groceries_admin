@@ -76,11 +76,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 bg-gradient-to-r from-emerald-950 to-emerald-900 border border-emerald-800/50 rounded-lg p-3 sm:p-4 lg:p-5 shadow-sm">
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            {health?.status === 'ok' ? <CheckCircle2 size={14} strokeWidth={2.5} /> : <AlertCircle size={14} className="text-red-400" />}
+            {health?.status === 'ok' ? <CheckCircle2 size={14} strokeWidth={2.5} /> : health?.status === 'degraded' ? <AlertCircle size={14} className="text-amber-400" /> : <AlertCircle size={14} className="text-red-400" />}
             API Status
           </span>
-          <span className={`text-sm font-bold ${health?.status !== 'ok' ? 'text-red-400' : 'text-white'}`}>
-            {health?.status === 'ok' ? 'Healthy' : health === null ? 'Checking…' : 'Down'}
+          <span className={`text-sm font-bold ${health?.status === 'ok' ? 'text-white' : health?.status === 'degraded' ? 'text-amber-400' : 'text-red-400'}`}>
+            {health?.status === 'ok' ? 'Healthy' : health?.status === 'degraded' ? 'Degraded' : health === null ? 'Checking…' : 'Down'}
           </span>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -88,8 +88,8 @@ export default function DashboardPage() {
             {health?.services.database === 'up' ? <CheckCircle2 size={14} strokeWidth={2.5} /> : <AlertCircle size={14} className="text-red-400" />}
             Database
           </span>
-          <span className={`text-sm font-bold ${health?.services.database !== 'up' ? 'text-red-400' : 'text-white'}`}>
-            {health?.services.database === 'up' ? 'Operational' : 'Error'}
+          <span className={`text-sm font-bold ${health?.services.database === 'up' ? 'text-white' : 'text-red-400'}`}>
+            {health?.services.database === 'up' ? 'Operational' : 'Down'}
           </span>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -97,8 +97,8 @@ export default function DashboardPage() {
             {health?.services.redis === 'up' ? <CheckCircle2 size={14} strokeWidth={2.5} /> : <AlertCircle size={14} className="text-amber-400" />}
             Redis
           </span>
-          <span className={`text-sm font-bold ${health?.services.redis !== 'up' ? 'text-amber-400' : 'text-white'}`}>
-            {health?.services.redis === 'up' ? 'Operational' : 'Fallback'}
+          <span className={`text-sm font-bold ${health?.services.redis === 'up' ? 'text-white' : 'text-amber-400'}`}>
+            {health?.services.redis === 'up' ? 'Operational' : 'Disabled (Fallback)'}
           </span>
         </div>
         <div className="flex flex-col gap-1.5">

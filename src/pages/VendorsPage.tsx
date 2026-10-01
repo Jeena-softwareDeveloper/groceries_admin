@@ -143,7 +143,7 @@ export default function VendorsPage() {
       cell: (v) => (
         <div className="flex items-center gap-3">
           {v.logoUrl ? (
-            <img src={v.logoUrl} alt={v.shopName} className="w-8 h-8 rounded-lg object-cover bg-slate-100 shrink-0" />
+            <img src={v.logoUrl.startsWith('http') ? v.logoUrl : `${import.meta.env.VITE_IMAGE_BASE_URL}/${v.logoUrl}`} alt={v.shopName} className="w-8 h-8 rounded-lg object-cover bg-slate-100 shrink-0" />
           ) : (
             <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
               <span className="font-bold">{v.shopName.charAt(0).toUpperCase()}</span>
