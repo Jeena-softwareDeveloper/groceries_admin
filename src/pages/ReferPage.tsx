@@ -24,10 +24,10 @@ export default function ReferPage() {
   }, [ref]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 text-slate-900">
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-slate-50 m-0 p-0 overflow-hidden">
       <Loader2 className="w-10 h-10 animate-spin text-emerald-600 mb-4" />
-      <h2 className="text-xl font-bold">Redirecting to Play Store...</h2>
-      <p className="text-slate-500 mt-2">Please wait while we take you to the app.</p>
+      <h2 className="text-lg font-medium text-slate-900">Redirecting to Play Store...</h2>
+      <p className="text-slate-700 mt-2 text-sm">Please wait while we take you to the app.</p>
     </div>
   );
 }
