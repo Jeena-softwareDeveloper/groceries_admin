@@ -11,13 +11,23 @@ export default function ReferPage() {
     const handleReferral = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/customer/refer-link?ref=${ref || ''}`);
-        if (res.data?.success && res.data?.data?.playStoreUrl) {
-          window.location.href = res.data.data.playStoreUrl;
-        } else {
-          window.location.href = 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
-        }
+        const playStoreUrl = (res.data?.success && res.data?.data?.playStoreUrl) 
+            ? res.data.data.playStoreUrl 
+            : 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
+            
+        // 1. Try to open the mobile app directly using the custom scheme
+        window.location.href = `districtmart://refer?ref=${ref || ''}`;
+        
+        // 2. If the app is not installed, fallback to the Play Store after a short delay
+        setTimeout(() => {
+          window.location.href = playStoreUrl;
+        }, 2000);
+
       } catch (err) {
-        window.location.href = 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
+        window.location.href = `districtmart://refer?ref=${ref || ''}`;
+        setTimeout(() => {
+          window.location.href = 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
+        }, 2000);
       }
     };
     handleReferral();
