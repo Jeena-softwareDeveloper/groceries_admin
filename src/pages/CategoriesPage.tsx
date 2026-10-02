@@ -16,6 +16,7 @@ export default function CategoriesPage() {
   const [slug, setSlug] = useState('');
   const [parentId, setParentId] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [sortOrder, setSortOrder] = useState('0');
   const [isActive, setIsActive] = useState(true);
   
   const [search, setSearch] = useState('');
@@ -25,6 +26,7 @@ export default function CategoriesPage() {
     setSlug('');
     setParentId('');
     setImageUrl('');
+    setSortOrder('0');
     setIsActive(true);
     setEditCategory(null);
     setShowForm(false);
@@ -35,16 +37,18 @@ export default function CategoriesPage() {
     setSlug(c.slug);
     setParentId(parent || c.parentId || '');
     setImageUrl(c.imageUrl || '');
+    setSortOrder(String(c.sortOrder ?? 0));
     setIsActive(c.isActive);
     setEditCategory(c);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    const payload = { name, slug, imageUrl: imageUrl || undefined, parentId: parentId || undefined, sortOrder: Number(sortOrder), isActive };
     if (editCategory) {
-      await categoryApi.update(editCategory.id, { name, slug, imageUrl: imageUrl || undefined, parentId: parentId || undefined, isActive });
+      await categoryApi.update(editCategory.id, payload);
     } else {
-      await categoryApi.create({ name, slug, imageUrl: imageUrl || undefined, parentId: parentId || undefined, isActive });
+      await categoryApi.create(payload);
     }
     resetForm();
     refetch();
@@ -139,6 +143,13 @@ export default function CategoriesPage() {
       )
     },
     {
+      key: 'sortOrder',
+      header: 'Order',
+      cell: (c) => (
+        <span className="font-mono text-slate-500 font-bold">{c.sortOrder ?? 0}</span>
+      )
+    },
+    {
       key: 'status',
       header: 'Status',
       cell: (c) => (
@@ -220,6 +231,18 @@ export default function CategoriesPage() {
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Sort Order</label>
+            <input
+              type="number"
+              className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-900 outline-none bg-white placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-100 transition-all w-full"
+              placeholder="e.g. 1"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+              required
+            />
           </div>
 
           <div className="flex items-center gap-3 mt-2">

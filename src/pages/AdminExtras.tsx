@@ -16,6 +16,7 @@ export function BannersPage() {
   const [videoUrl, setVideoUrl] = useState('');
   const [type, setType] = useState<'IMAGE' | 'VIDEO'>('IMAGE');
   const [row, setRow] = useState(1);
+  const [sortOrder, setSortOrder] = useState('0');
   const [themeColor, setThemeColor] = useState('#16a34a');
   const [themeColorEnd, setThemeColorEnd] = useState('#4ade80');
 
@@ -25,6 +26,7 @@ export function BannersPage() {
   const resetForm = () => {
     setTitle(''); setImageUrl(''); setVideoUrl('');
     setType('IMAGE'); setRow(1);
+    setSortOrder('0');
     setThemeColor('#16a34a'); setThemeColorEnd('#4ade80');
     setEditingId(null);
   };
@@ -37,6 +39,7 @@ export function BannersPage() {
         imageUrl: imageUrl || '',
         videoUrl: videoUrl || null,
         type, row,
+        sortOrder: Number(sortOrder),
         themeColor, themeColorEnd,
         isActive: true
       };
@@ -61,6 +64,7 @@ export function BannersPage() {
     setVideoUrl(b.videoUrl || '');
     setType(b.type || 'IMAGE');
     setRow(b.row || 1);
+    setSortOrder(String(b.sortOrder ?? 0));
     setThemeColor(b.themeColor || '#16a34a');
     setThemeColorEnd(b.themeColorEnd || '#4ade80');
     setShowForm(true);
@@ -116,6 +120,12 @@ export function BannersPage() {
       header: 'Type',
       hideOnMobile: true,
       cell: (b) => <span className="text-xs font-semibold text-slate-500">{b.type || 'IMAGE'}</span>
+    },
+    {
+      key: 'sortOrder',
+      header: 'Order',
+      hideOnMobile: true,
+      cell: (b) => <span className="font-mono text-slate-500 font-bold">{b.sortOrder ?? 0}</span>
     },
     {
       key: 'status',
@@ -212,6 +222,10 @@ export function BannersPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
             <input className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all" placeholder="Enter banner title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Sort Order</label>
+            <input type="number" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all" placeholder="e.g. 1" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} required />
           </div>
           {type === 'VIDEO' ? (
             <div>
