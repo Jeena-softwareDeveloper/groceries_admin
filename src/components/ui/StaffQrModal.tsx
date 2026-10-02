@@ -54,8 +54,7 @@ export function StaffQrModal({ isOpen, onClose, staff }: StaffQrModalProps) {
 
   if (!isOpen || !staff) return null;
 
-  const baseUrl = import.meta.env.VITE_WEB_APP_URL;
-  const referralUrl = `${baseUrl}/refer?ref=${staff.code}`;
+  const referralUrl = `https://alltimemarket.in/refer?ref=${staff.code}`;
   const location = staff.area?.name
     ? `${staff.area.name}, ${staff.district?.name || 'Tamil Nadu'}`
     : staff.district?.name || 'All Areas, Tamil Nadu';
