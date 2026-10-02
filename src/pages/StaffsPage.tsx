@@ -409,58 +409,7 @@ export default function StaffsPage() {
         />
       </div>
 
-      {/* ── PERFORMANCE LEADERBOARD (if data exists) ── */}
-      {staffList.length > 0 && (
-        <div className="mt-5 rounded-2xl border border-slate-200/80 overflow-hidden bg-white shadow-sm">
-          <div className="flex items-center gap-2.5 px-5 py-3.5 border-b border-slate-100 bg-gradient-to-r from-amber-50 to-white">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-sm">
-              <TrendingUp size={13} className="text-white" />
-            </div>
-            <span className="text-sm font-bold text-slate-800">Referral Leaderboard</span>
-            <span className="text-xs text-slate-400 font-medium">— Top performers</span>
-          </div>
-          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[...staffList]
-              .sort((a, b) => (b.vendorsCount || 0) - (a.vendorsCount || 0))
-              .slice(0, 6)
-              .map((s, i) => {
-                const palette = avatarPalettes[i % avatarPalettes.length];
-                const medals = ['🥇', '🥈', '🥉'];
-                return (
-                  <button
-                    key={s.id}
-                    onClick={() => navigate(`/staffs/${s.id}`)}
-                    className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 hover:border-emerald-200 hover:bg-emerald-50/50 transition-all group cursor-pointer text-left"
-                  >
-                    <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${palette.bg} text-white font-black text-sm flex items-center justify-center shrink-0 shadow-sm`}>
-                      {s.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-slate-900 text-xs truncate">{s.name}</span>
-                        {medals[i] && <span className="text-sm">{medals[i]}</span>}
-                      </div>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <div
-                          className="h-1.5 rounded-full"
-                          style={{
-                            width: `${Math.max(8, ((s.vendorsCount || 0) / Math.max(topPerformer?.vendorsCount || 1, 1)) * 80)}px`,
-                            background: 'linear-gradient(90deg, #059669, #0d9488)',
-                          }}
-                        />
-                        <span className="text-[11px] text-slate-500 font-semibold">{s.vendorsCount || 0} vendors</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Shield size={11} className={`transition-colors ${s.isActive ? 'text-emerald-500' : 'text-slate-300'}`} />
-                      <Eye size={12} className="text-slate-300 group-hover:text-emerald-600 transition-colors" />
-                    </div>
-                  </button>
-                );
-              })}
-          </div>
-        </div>
-      )}
+
 
       {/* Add / Edit Staff Drawer */}
       <AddStaffDrawer
