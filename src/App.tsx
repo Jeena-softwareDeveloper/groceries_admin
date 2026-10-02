@@ -16,6 +16,7 @@ import ProductApprovalsPage from './pages/ProductApprovalsPage';
 import SettlementsPage from './pages/SettlementsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
 import QrGeneratorPage from './pages/QrGeneratorPage';
+import ReferPage from './pages/ReferPage';
 
 import { AdminRoute, GuestRoute } from './guards';
 
@@ -27,6 +28,7 @@ export default function App() {
       <Toaster position="top-right" richColors />
       <BrowserRouter>
         <Routes>
+          <Route path="/refer" element={<ReferPage />} />
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route
             path="/"
