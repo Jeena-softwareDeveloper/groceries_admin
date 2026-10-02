@@ -23,6 +23,16 @@ import { AdminRoute, GuestRoute } from './guards';
 import { Toaster } from 'sonner';
 
 export default function App() {
+  // If the user visits the referral domain but accesses an admin path (like /login or /dashboard),
+  // immediately redirect them to the proper admin domain.
+  if (window.location.hostname === 'refer.alltimemarket.in') {
+    const allowedPaths = ['/refer', '/app', '/become-vendor'];
+    if (!allowedPaths.some(p => window.location.pathname.startsWith(p))) {
+      window.location.href = `https://app.alltimemarket.in${window.location.pathname}${window.location.search}`;
+      return null; // Stop rendering the React app on the wrong domain
+    }
+  }
+
   return (
     <AuthProvider>
       <Toaster position="top-right" richColors />
