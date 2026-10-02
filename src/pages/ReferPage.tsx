@@ -14,10 +14,10 @@ export default function ReferPage() {
         if (res.data?.success && res.data?.data?.playStoreUrl) {
           window.location.href = res.data.data.playStoreUrl;
         } else {
-          window.location.href = 'https://play.google.com/store/apps/details?id=com.districtmart.app';
+          window.location.href = 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
         }
       } catch (err) {
-        window.location.href = 'https://play.google.com/store/apps/details?id=com.districtmart.app';
+        window.location.href = 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
       }
     };
     handleReferral();
