@@ -9,24 +9,39 @@ export default function ReferPage() {
 
   useEffect(() => {
     const handleReferral = async () => {
+      // Build the Play Store URL with referrer so Google Play passes the code through on first install
+      const buildPlayStoreUrl = (baseUrl: string, refCode: string) => {
+        const referrer = encodeURIComponent(`utm_source=${refCode}&utm_medium=qr_referral`);
+        // If base URL already has query params, just append
+        if (baseUrl.includes('?')) {
+          return `${baseUrl}&referrer=${referrer}`;
+        }
+        return `${baseUrl}?referrer=${referrer}`;
+      };
+
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/customer/refer-link?ref=${ref || ''}`);
-        const playStoreUrl = (res.data?.success && res.data?.data?.playStoreUrl) 
+        const basePlayStoreUrl = (res.data?.success && res.data?.data?.playStoreUrl) 
             ? res.data.data.playStoreUrl 
             : 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
+        
+        const playStoreUrl = ref ? buildPlayStoreUrl(basePlayStoreUrl, ref) : basePlayStoreUrl;
             
-        // 1. Try to open the mobile app directly using the custom scheme
+        // 1. Try to open the mobile app directly using the custom scheme (if app already installed)
         window.location.href = `districtmart://refer?ref=${ref || ''}`;
         
-        // 2. If the app is not installed, fallback to the Play Store after a short delay
+        // 2. If app not installed, fallback to Play Store WITH the referrer so it's tracked on first install
         setTimeout(() => {
           window.location.href = playStoreUrl;
         }, 2000);
 
       } catch (err) {
+        const fallbackUrl = ref
+          ? `https://play.google.com/store/apps/details?id=com.alltimemarket.app?referrer=${encodeURIComponent(`utm_source=${ref}&utm_medium=qr_referral`)}`
+          : 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
         window.location.href = `districtmart://refer?ref=${ref || ''}`;
         setTimeout(() => {
-          window.location.href = 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
+          window.location.href = fallbackUrl;
         }, 2000);
       }
     };
