@@ -37,7 +37,7 @@ export default function ReferPage() {
 
       } catch (err) {
         const fallbackUrl = ref
-          ? `https://play.google.com/store/apps/details?id=com.alltimemarket.app?referrer=${encodeURIComponent(`utm_source=${ref}&utm_medium=qr_referral`)}`
+          ? `https://play.google.com/store/apps/details?id=com.alltimemarket.app&referrer=${encodeURIComponent(`utm_source=${ref}&utm_medium=qr_referral`)}`
           : 'https://play.google.com/store/apps/details?id=com.alltimemarket.app';
         window.location.href = `districtmart://refer?ref=${ref || ''}`;
         setTimeout(() => {
