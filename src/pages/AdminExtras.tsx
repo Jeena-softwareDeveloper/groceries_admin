@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { adminExtrasApi } from '../api';
-import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, Ban, Send, Check } from 'lucide-react';
+import { Filter, Plus, ChevronsUpDown, Eye, Edit, Trash2, Ban, Send, Check, Power, PowerOff } from 'lucide-react';
 import { Modal, ImageUpload, PageHeader, ConfirmModal, DataTable, ColumnDef, StatusBadge, Pagination, SearchBar } from '../components/ui';
 import { toast } from 'sonner';
 
@@ -84,6 +84,15 @@ export function BannersPage() {
     setConfirmModal({ isOpen: false, id: null });
   };
 
+  const handleToggleStatus = async (b: any) => {
+    try {
+      await adminExtrasApi.banners.update(b.id, { isActive: b.isActive === false ? true : false });
+      load();
+    } catch (err: any) {
+      toast.error('Failed to toggle status');
+    }
+  };
+
   const rowLabels: Record<number, { label: string; desc: string; color: string }> = {
     1: { label: 'Row 1 — Video Banner', desc: 'Full-width video at the top of the home screen', color: 'bg-purple-100 text-purple-700 border-purple-200' },
     2: { label: 'Row 2 — Dual Images', desc: 'Two side-by-side promotional images', color: 'bg-blue-100 text-blue-700 border-blue-200' },
@@ -146,6 +155,13 @@ export function BannersPage() {
       header: 'Actions',
       cell: (b) => (
         <div className="flex items-center gap-2">
+          <button 
+            onClick={() => handleToggleStatus(b)}
+            className={`w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg cursor-pointer transition-colors ${b.isActive !== false ? 'text-amber-500 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-600' : 'text-emerald-500 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600'}`}
+            title={b.isActive !== false ? "Deactivate" : "Activate"}
+          >
+            {b.isActive !== false ? <PowerOff size={14} strokeWidth={2.5} /> : <Power size={14} strokeWidth={2.5} />}
+          </button>
           <button 
             onClick={() => handleEdit(b)} 
             className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-lg text-slate-400 cursor-pointer hover:bg-slate-100 hover:text-slate-700 transition-colors"
