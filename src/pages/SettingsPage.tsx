@@ -105,7 +105,7 @@ export default function SettingsPage() {
     deliveryFee: '0',
     isDeliveryKmBased: false,
     deliveryFeePerKm: '10',
-    minAppVersion: '1.0.0',
+    minAppVersion: '',
     playStoreUrl: 'https://play.google.com/store/apps/details?id=com.alltimemarket.app',
     
     // Platform
