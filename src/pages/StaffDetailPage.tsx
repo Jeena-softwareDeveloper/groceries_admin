@@ -170,9 +170,8 @@ export default function StaffDetailPage() {
   }
 
   // Links
-  const baseUrl = import.meta.env.VITE_WEB_APP_URL;
-  const vendorLink = `${baseUrl}/become-vendor?ref=${staff.code}`;
-  const appInstallLink = `${baseUrl}/app?ref=${staff.code}`;
+  const vendorLink = `https://refer.alltimemarket.in/become-vendor?ref=${staff.code}`;
+  const appInstallLink = `https://refer.alltimemarket.in/app?ref=${staff.code}`;
 
   // Filtered lists
   const filteredVendors = (staff.referredVendors || []).filter(v => 
