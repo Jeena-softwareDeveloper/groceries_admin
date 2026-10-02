@@ -5,6 +5,7 @@ export interface Category {
   imageUrl?: string | null;
   isActive: boolean;
   parentId?: string | null;
+  sortOrder?: number;
   children?: Category[];
 }
 
